@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文件管理站</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f2ec;
+      --surface: #ffffff;
+      --surface2: #f0ede6;
+      --border: #e0dbd0;
+      --ink: #1c1a16;
+      --ink2: #5a5650;
+      --accent: #c8441a;
+      --accent2: #2a6496;
+      --gold: #b8860b;
+      --success: #2d7a45;
+      --danger: #c8441a;
+      --radius: 4px;
+      --shadow: 0 1px 4px rgba(28,26,22,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Sora', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 20px;
+      background: var(--bg);
+      z-index: 100;
+      padding: 24px;
+    }
+
+    .login-masthead { text-align: center; margin-bottom: 8px; }
+    .login-masthead h1 { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--ink2); font-weight: 400; margin-bottom: 6px; }
+    .login-masthead h2 { font-size: 32px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+    .login-masthead .rule { width: 40px; height: 2px; background: var(--accent); margin: 12px auto 0; }
+
+    .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 32px; width: 460px; max-width: 100%; box-shadow: var(--shadow); }
+
+    .field-group { margin-bottom: 18px; }
+    .field-label { display: block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink2); font-weight: 600; margin-bottom: 6px; }
+    .field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 13px; color: var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; transition: border-color 0.15s; }
+    .field-input:focus { border-color: var(--ink); }
+    .field-hint { font-size: 11px; color: var(--ink2); margin-top: 4px; line-height: 1.5; }
+
+    .btn-primary { width: 100%; background: var(--ink); color: var(--bg); border: none; border-radius: var(--radius); padding: 12px; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.05em; cursor: pointer; transition: background 0.15s; margin-top: 8px; }
+    .btn-primary:hover { background: var(--accent); }
+
+    .help-panel { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: var(--radius); padding: 16px 18px; width: 460px; max-width: 100%; font-size: 12px; color: var(--ink2); line-height: 1.8; }
+    .help-panel strong { color: var(--ink); }
+    .help-panel code { font-family: 'JetBrains Mono', monospace; background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+    .help-panel a { color: var(--accent2); }
+
+    /* ── APP ── */
+    #app { display: none; min-height: 100vh; }
+
+    header { background: var(--ink); color: var(--bg); padding: 0 40px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+    .logo { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+    .logo em { font-style: normal; color: var(--accent); margin-right: 6px; }
+    .header-right { display: flex; gap: 8px; align-items: center; }
+    .worker-url-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(245,242,236,0.4); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-header { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: rgba(245,242,236,0.7); border-radius: var(--radius); padding: 5px 12px; font-size: 11px; cursor: pointer; font-family: 'Sora', sans-serif; transition: all 0.15s; letter-spacing: 0.04em; }
+    .btn-header:hover { background: rgba(255,255,255,0.15); color: var(--bg); }
+
+    .stats-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 40px; display: flex; gap: 28px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--ink2); }
+    .stats-bar strong { color: var(--ink); font-weight: 600; }
+
+    main { max-width: 1000px; margin: 0 auto; padding: 32px 24px; }
+
+    /* Upload */
+    .upload-area { border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 28px; transition: border-color 0.2s; overflow: hidden; }
+    .upload-area.drag-over { border-color: var(--ink); background: var(--surface2); }
+    .upload-inner { padding: 36px 24px; text-align: center; cursor: pointer; }
+    .upload-icon-wrap { width: 52px; height: 52px; background: var(--surface2); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 22px; }
+    .upload-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .upload-sub { font-size: 12px; color: var(--ink2); }
+    #file-input { display: none; }
+
+    .upload-queue { display: none; border-top: 1px solid var(--border); }
+    .queue-header { padding: 10px 20px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); font-weight: 600; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .queue-item { padding: 10px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .queue-item:last-child { border-bottom: none; }
+    .queue-name { flex: 1; font-family: 'JetBrains Mono', monospace; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .queue-size { color: var(--ink2); font-family: 'JetBrains Mono', monospace; min-width: 70px; text-align: right; }
+    .queue-status { min-width: 70px; text-align: right; font-weight: 600; font-size: 11px; }
+    .queue-status.pending { color: var(--ink2); }
+    .queue-status.uploading { color: var(--gold); }
+    .queue-status.done { color: var(--success); }
+    .queue-status.error { color: var(--danger); }
+    .queue-bar-wrap { min-width: 80px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .queue-bar-fill { height: 100%; background: var(--gold); border-radius: 2px; width: 0%; transition: width 0.2s; }
+    .queue-bar-fill.done { background: var(--success); width: 100% !important; }
+    .queue-bar-fill.fail { background: var(--danger); width: 100% !important; }
+
+    /* Toolbar */
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+    .filter-tabs { display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .ftab { padding: 7px 16px; font-size: 12px; cursor: pointer; border: none; background: var(--surface); color: var(--ink2); font-family: 'Sora', sans-serif; font-weight: 600; letter-spacing: 0.03em; border-right: 1px solid var(--border); transition: all 0.15s; }
+    .ftab:last-child { border-right: none; }
+    .ftab.active { background: var(--ink); color: var(--bg); }
+    .ftab:hover:not(.active) { background: var(--surface2); }
+    .toolbar-right { display: flex; gap: 8px; align-items: center; }
+    .search-input { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 12px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--ink); outline: none; width: 200px; transition: border-color 0.15s; }
+    .search-input:focus { border-color: var(--ink); }
+    .btn-refresh { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 7px 14px; font-size: 12px; cursor: pointer; color: var(--ink2); transition: all 0.15s; font-family: 'Sora', sans-serif; }
+    .btn-refresh:hover { border-color: var(--ink); color: var(--ink); }
+
+    /* Table */
+    .file-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .table-head { display: grid; grid-template-columns: 40px 1fr 90px 140px 180px; padding: 9px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); font-weight: 600; }
+    .file-row { display: grid; grid-template-columns: 40px 1fr 90px 140px 180px; padding: 11px 16px; border-bottom: 1px solid var(--border); align-items: center; transition: background 0.12s; }
+    .file-row:last-child { border-bottom: none; }
+    .file-row:hover { background: var(--surface2); }
+    .file-icon-cell { font-size: 18px; }
+    .file-name-cell { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; }
+    .file-size-cell { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink2); }
+    .file-date-cell { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink2); }
+    .file-actions-cell { display: flex; gap: 5px; justify-content: flex-end; }
+
+    .action-btn { background: transparent; border: 1px solid var(--border); border-radius: var(--radius); padding: 5px 9px; font-size: 11px; cursor: pointer; color: var(--ink2); transition: all 0.15s; white-space: nowrap; font-family: 'Sora', sans-serif; font-weight: 600; }
+    .action-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+    .action-btn.del:hover { border-color: var(--danger); color: var(--danger); }
+    .action-btn.play:hover { border-color: var(--success); color: var(--success); }
+
+    .empty { text-align: center; padding: 64px 24px; color: var(--ink2); font-size: 13px; line-height: 1.8; }
+    .empty .big { font-size: 40px; margin-bottom: 12px; display: block; }
+
+    /* Modal */
+    #modal { display: none; position: fixed; inset: 0; background: rgba(28,26,22,0.75); z-index: 200; align-items: center; justify-content: center; padding: 24px; }
+    #modal.open { display: flex; }
+    .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 860px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .modal-bar { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface2); }
+    .modal-name { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }
+    .modal-x { background: transparent; border: 1px solid var(--border); border-radius: var(--radius); width: 26px; height: 26px; font-size: 14px; cursor: pointer; color: var(--ink2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .modal-x:hover { border-color: var(--danger); color: var(--danger); }
+    .modal-body { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; min-height: 260px; padding: 32px; }
+    .modal-body audio { width: 100%; max-width: 480px; }
+
+    .ppt-preview { text-align: center; max-width: 500px; }
+    .ppt-preview .icon { font-size: 52px; margin-bottom: 16px; display: block; }
+    .ppt-preview p { font-size: 13px; color: var(--ink2); line-height: 1.8; margin-bottom: 20px; }
+    .preview-btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .preview-link { display: inline-block; padding: 9px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600; text-decoration: none; transition: opacity 0.15s; }
+    .preview-link:hover { opacity: 0.82; }
+    .preview-link.primary { background: var(--ink); color: var(--bg); }
+    .preview-link.secondary { background: transparent; border: 1px solid var(--border); color: var(--ink); }
+
+    /* Confirm */
+    #confirm { display: none; position: fixed; inset: 0; background: rgba(28,26,22,0.7); z-index: 300; align-items: center; justify-content: center; }
+    #confirm.open { display: flex; }
+    .confirm-box { background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--danger); border-radius: var(--radius); padding: 28px 28px 24px; width: 360px; max-width: 90vw; box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
+    .confirm-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .confirm-msg { font-size: 13px; color: var(--ink2); margin-bottom: 22px; line-height: 1.6; }
+    .confirm-row { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-cancel { padding: 8px 18px; border-radius: var(--radius); border: 1px solid var(--border); background: transparent; font-size: 13px; cursor: pointer; transition: all 0.15s; font-family: 'Sora', sans-serif; }
+    .btn-cancel:hover { border-color: var(--ink); }
+    .btn-del { padding: 8px 18px; border-radius: var(--radius); border: none; background: var(--danger); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Sora', sans-serif; transition: opacity 0.15s; }
+    .btn-del:hover { opacity: 0.85; }
+
+    /* Toast */
+    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: var(--bg); border-radius: var(--radius); padding: 11px 18px; font-size: 12px; font-family: 'JetBrains Mono', monospace; display: none; z-index: 9999; max-width: 320px; animation: tin 0.2s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    #toast.success { background: var(--success); }
+    #toast.error { background: var(--danger); }
+    @keyframes tin { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    @media (max-width: 700px) {
+      header { padding: 0 16px; }
+      .stats-bar { padding: 10px 16px; gap: 16px; overflow-x: auto; }
+      main { padding: 20px 14px; }
+      .worker-url-badge { display: none; }
+      .table-head, .file-row { grid-template-columns: 32px 1fr 80px 140px; }
+      .file-date-cell { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-masthead">
+    <h1>Cloudflare R2 · File Manager</h1>
+    <h2>文件管理站</h2>
+    <div class="rule"></div>
+  </div>
+
+  <div class="login-box">
+    <div class="field-group">
+      <label class="field-label">Worker API 地址</label>
+      <input class="field-input" id="inp-worker" type="url" placeholder="https://file-manager-api.xxx.workers.dev">
+      <div class="field-hint">你部署的 Cloudflare Worker 完整地址</div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">访问密钥（AUTH_KEY）</label>
+      <input class="field-input" id="inp-key" type="password" placeholder="你在 Worker 环境变量里设置的密码">
+      <div class="field-hint">在 Worker → Settings → Variables 中设置的 AUTH_KEY 值</div>
+    </div>
+    <button class="btn-primary" onclick="saveConfig()">进入管理站 →</button>
+  </div>
+
+  <div class="help-panel">
+    <strong>还没部署 Worker？</strong><br>
+    1. 注册 <a href="https://cloudflare.com" target="_blank">Cloudflare</a> → R2 → 创建存储桶 → 开启公开访问<br>
+    2. Workers &amp; Pages → 创建 Worker → 粘贴 Worker 代码 → Deploy<br>
+    3. Worker Settings → Bindings → 绑定 R2，变量名 <code>MY_BUCKET</code><br>
+    4. Variables → 添加 <code>AUTH_KEY</code>（你的密码）和 <code>PUBLIC_URL</code>（R2公开域名）<br>
+    5. 填写上方表单即可开始使用
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <header>
+    <div class="logo"><em>▣</em> FILE MANAGER</div>
+    <div class="header-right">
+      <div class="worker-url-badge" id="worker-badge"></div>
+      <button class="btn-header" onclick="refreshFiles()">↺ 刷新</button>
+      <button class="btn-header" onclick="clearConfig()">退出配置</button>
+    </div>
+  </header>
+
+  <div class="stats-bar">
+    <span>全部 <strong id="stat-total">—</strong></span>
+    <span>PPT <strong id="stat-ppt">—</strong></span>
+    <span>音频 <strong id="stat-audio">—</strong></span>
+    <span>其他 <strong id="stat-other">—</strong></span>
+    <span>总大小 <strong id="stat-size">—</strong></span>
+  </div>
+
+  <main>
+    <div class="upload-area" id="upload-area">
+      <div class="upload-inner" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon-wrap">☁</div>
+        <div class="upload-title">点击选择文件，或拖拽到此处上传</div>
+        <div class="upload-sub">支持所有格式 · 无文件大小限制 · 支持批量上传</div>
+      </div>
+      <div class="upload-queue" id="upload-queue">
+        <div class="queue-header">
+          <span>上传队列</span>
+          <span id="queue-summary"></span>
+        </div>
+        <div id="queue-items"></div>
+      </div>
+    </div>
+    <input type="file" id="file-input" multiple>
+
+    <div class="toolbar">
+      <div class="filter-tabs">
+        <button class="ftab active" onclick="setFilter('all',this)">全部</button>
+        <button class="ftab" onclick="setFilter('ppt',this)">📊 PPT</button>
+        <button class="ftab" onclick="setFilter('audio',this)">🎵 音频</button>
+        <button class="ftab" onclick="setFilter('other',this)">📄 其他</button>
+      </div>
+      <div class="toolbar-right">
+        <input class="search-input" id="search-input" type="text" placeholder="搜索文件名..." oninput="renderFiles()">
+        <button class="btn-refresh" onclick="refreshFiles()">↺ 刷新列表</button>
+      </div>
+    </div>
+
+    <div class="file-table">
+      <div class="table-head">
+        <div></div>
+        <div>文件名</div>
+        <div>大小</div>
+        <div>上传时间</div>
+        <div style="text-align:right">操作</div>
+      </div>
+      <div id="file-list">
+        <div class="empty"><span class="big">⌛</span>正在连接...</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══ MODAL ══ -->
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-bar">
+      <div class="modal-name" id="modal-name"></div>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ══ CONFIRM ══ -->
+<div id="confirm">
+  <div class="confirm-box">
+    <div class="confirm-title">确认删除</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-row">
+      <button class="btn-cancel" onclick="closeConfirm()">取消</button>
+      <button class="btn-del" id="confirm-ok">确认删除</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let CFG = {}, allFiles = [], currentFilter = 'all';
+
+// ── Config ──
+function saveConfig() {
+  const worker = document.getElementById('inp-worker').value.trim().replace(/\/$/, '');
+  const key = document.getElementById('inp-key').value.trim();
+  if (!worker || !key) { toast('请填写 Worker 地址和密钥', 'error'); return; }
+  CFG = { worker, key };
+  localStorage.setItem('r2fm', JSON.stringify(CFG));
+  bootApp();
+}
+
+function loadConfig() {
+  try { const s = localStorage.getItem('r2fm'); if (s) { CFG = JSON.parse(s); return !!(CFG.worker && CFG.key); } } catch {}
+  return false;
+}
+
+function clearConfig() { localStorage.removeItem('r2fm'); location.reload(); }
+
+window.onload = () => { if (loadConfig()) bootApp(); };
+
+function bootApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('worker-badge').textContent = CFG.worker;
+  setupDrop(); setupInput(); refreshFiles();
+}
+
+// ── API ──
+function api(path, opts = {}) {
+  return fetch(CFG.worker + path, { ...opts, headers: { 'X-Auth-Key': CFG.key, ...(opts.headers || {}) } });
+}
+
+async function refreshFiles() {
+  document.getElementById('file-list').innerHTML = '<div class="empty"><span class="big">⌛</span>加载中...</div>';
+  try {
+    const res = await api('/list');
+    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + await res.text());
+    allFiles = await res.json();
+    updateStats(); renderFiles();
+  } catch(e) {
+    toast('加载失败：' + e.message, 'error');
+    document.getElementById('file-list').innerHTML = `<div class="empty"><span class="big">⚠️</span>加载失败<br><small style="font-family:monospace">${e.message}</small></div>`;
+  }
+}
+
+// ── Helpers ──
+function ftype(n) {
+  const e = n.split('.').pop().toLowerCase();
+  if (['ppt','pptx'].includes(e)) return 'ppt';
+  if (['mp3','wav','m4a','ogg','flac','aac','opus','wma'].includes(e)) return 'audio';
+  return 'other';
+}
+function ficon(t) { return t==='ppt'?'📊':t==='audio'?'🎵':'📄'; }
+function fmtSize(b) {
+  if (!b) return '—';
+  if (b<1024) return b+' B';
+  if (b<1048576) return (b/1024).toFixed(1)+' KB';
+  if (b<1073741824) return (b/1048576).toFixed(1)+' MB';
+  return (b/1073741824).toFixed(2)+' GB';
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('zh-CN')+' '+dt.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function updateStats() {
+  const ppt = allFiles.filter(f=>ftype(f.name)==='ppt').length;
+  const audio = allFiles.filter(f=>ftype(f.name)==='audio').length;
+  const other = allFiles.length - ppt - audio;
+  const total = allFiles.reduce((s,f)=>s+(f.size||0),0);
+  document.getElementById('stat-total').textContent = allFiles.length;
+  document.getElementById('stat-ppt').textContent = ppt;
+  document.getElementById('stat-audio').textContent = audio;
+  document.getElementById('stat-other').textContent = other;
+  document.getElementById('stat-size').textContent = fmtSize(total);
+}
+
+function renderFiles() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const files = allFiles.filter(f => {
+    if (currentFilter !== 'all' && ftype(f.name) !== currentFilter) return false;
+    if (q && !f.name.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (!files.length) {
+    document.getElementById('file-list').innerHTML = '<div class="empty"><span class="big">📂</span>没有找到文件</div>';
+    return;
+  }
+
+  document.getElementById('file-list').innerHTML = files.map(f => {
+    const t = ftype(f.name);
+    return `<div class="file-row">
+      <div class="file-icon-cell">${ficon(t)}</div>
+      <div class="file-name-cell" title="${esc(f.name)}">${esc(f.name)}</div>
+      <div class="file-size-cell">${fmtSize(f.size)}</div>
+      <div class="file-date-cell">${fmtDate(f.uploaded)}</div>
+      <div class="file-actions-cell">
+        ${t==='audio'?`<button class="action-btn play" onclick="previewAudio('${esc(f.name)}','${esc(f.url)}')">▶ 播放</button>`:''}
+        ${t==='ppt'?`<button class="action-btn play" onclick="previewPPT('${esc(f.name)}','${esc(f.url)}')">👁 预览</button>`:''}
+        <button class="action-btn" onclick="dlFile('${esc(f.url)}','${esc(f.name)}')">⬇ 下载</button>
+        <button class="action-btn del" onclick="askDelete('${esc(f.name)}')">🗑 删除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderFiles();
+}
+
+// ── Upload ──
+function setupDrop() {
+  const area = document.getElementById('upload-area');
+  area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('drag-over'); });
+  area.addEventListener('dragleave', e => { if (!area.contains(e.relatedTarget)) area.classList.remove('drag-over'); });
+  area.addEventListener('drop', e => { e.preventDefault(); area.classList.remove('drag-over'); handleUpload(e.dataTransfer.files); });
+}
+
+function setupInput() {
+  document.getElementById('file-input').addEventListener('change', e => { handleUpload(e.target.files); e.target.value=''; });
+}
+
+async function handleUpload(fileList) {
+  if (!fileList.length) return;
+  const files = Array.from(fileList);
+  const queueEl = document.getElementById('upload-queue');
+  const itemsEl = document.getElementById('queue-items');
+  const summaryEl = document.getElementById('queue-summary');
+  itemsEl.innerHTML = '';
+  queueEl.style.display = 'block';
+
+  const items = files.map((f, i) => {
+    const id = 'qi' + Date.now() + i;
+    itemsEl.insertAdjacentHTML('beforeend', `
+      <div class="queue-item" id="${id}">
+        <span>${ficon(ftype(f.name))}</span>
+        <span class="queue-name">${esc(f.name)}</span>
+        <span class="queue-size">${fmtSize(f.size)}</span>
+        <div class="queue-bar-wrap"><div class="queue-bar-fill" id="${id}-bar"></div></div>
+        <span class="queue-status pending" id="${id}-st">等待中</span>
+      </div>`);
+    return { file: f, id };
+  });
+
+  let done = 0, failed = 0;
+
+  for (const { file, id } of items) {
+    const stEl = document.getElementById(id + '-st');
+    const barEl = document.getElementById(id + '-bar');
+    stEl.className = 'queue-status uploading';
+    stEl.textContent = '上传中';
+    summaryEl.textContent = `${done+failed}/${items.length} 完成`;
+
+    try {
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', `${CFG.worker}/${encodeURIComponent(file.name)}`);
+        xhr.setRequestHeader('X-Auth-Key', CFG.key);
+        xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+        xhr.upload.onprogress = e => { if (e.lengthComputable) barEl.style.width = (e.loaded/e.total*100)+'%'; };
+        xhr.onload = () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('HTTP ' + xhr.status));
+        xhr.onerror = () => reject(new Error('网络错误'));
+        xhr.send(file);
+      });
+      barEl.classList.add('done');
+      stEl.className = 'queue-status done'; stEl.textContent = '✓ 完成';
+      done++;
+    } catch(e) {
+      barEl.classList.add('fail');
+      stEl.className = 'queue-status error'; stEl.textContent = '✗ 失败';
+      failed++;
+    }
+    summaryEl.textContent = `${done+failed}/${items.length} 完成`;
+  }
+
+  toast(failed===0 ? `✓ ${done} 个文件上传成功` : `${done} 成功 / ${failed} 失败`, failed===0 ? 'success' : 'error');
+  setTimeout(() => { queueEl.style.display='none'; itemsEl.innerHTML=''; }, 4000);
+  await refreshFiles();
+}
+
+// ── Download ──
+function dlFile(url, name) {
+  const a = document.createElement('a');
+  a.href = url; a.download = name; a.target = '_blank';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ── Preview ──
+function previewAudio(name, url) {
+  document.getElementById('modal-name').textContent = name;
+  document.getElementById('modal-body').innerHTML = `<audio controls autoplay src="${url}" style="width:100%;max-width:480px"></audio>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function previewPPT(name, url) {
+  const msUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+  document.getElementById('modal-name').textContent = name;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="ppt-preview">
+      <span class="icon">📊</span>
+      <p>选择 PPT 预览方式：</p>
+      <div class="preview-btn-row">
+        <a class="preview-link primary" href="${msUrl}" target="_blank">🔗 微软在线预览（推荐）</a>
+        <a class="preview-link secondary" href="${url}" download="${name}" target="_blank">⬇ 下载到本地查看</a>
+      </div>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('modal-body').innerHTML = '';
+}
+
+document.getElementById('modal').addEventListener('click', e => { if (e.target===document.getElementById('modal')) closeModal(); });
+
+// ── Delete ──
+let pendingDel = null;
+
+function askDelete(name) {
+  pendingDel = name;
+  document.getElementById('confirm-msg').textContent = `即将永久删除「${name}」，此操作无法撤销。`;
+  document.getElementById('confirm').classList.add('open');
+  document.getElementById('confirm-ok').onclick = doDelete;
+}
+
+function closeConfirm() { document.getElementById('confirm').classList.remove('open'); pendingDel = null; }
+
+async function doDelete() {
+  const name = pendingDel; closeConfirm();
+  try {
+    const res = await api('/' + encodeURIComponent(name), { method: 'DELETE' });
+    if (!res.ok) throw new Error(await res.text());
+    toast('已删除：' + name, 'success');
+    await refreshFiles();
+  } catch(e) { toast('删除失败：' + e.message, 'error'); }
+}
+
+// ── Toast ──
+let toastT;
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = type; el.style.display = 'block';
+  clearTimeout(toastT); toastT = setTimeout(() => el.style.display='none', 3500);
+}
+</script>
+</body>
+</html>
