@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>文件管理站 - Pro Max</title>
+  <title>文件管理站 - 终极版</title>
   <link href="https://gs.jurieo.com/gemini/fonts-googleapis/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -23,16 +23,13 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--bg); color: var(--ink); font-family: 'Sora', sans-serif; min-height: 100vh; }
 
-    /* ── LOGIN ── */
     #login-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; background: var(--bg); z-index: 100; padding: 24px; }
     .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 32px; width: 460px; max-width: 100%; box-shadow: var(--shadow); }
     .field-group { margin-bottom: 18px; }
     .field-label { display: block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink2); font-weight: 600; margin-bottom: 6px; }
     .field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 13px; font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; }
     .btn-primary { width: 100%; background: var(--ink); color: var(--bg); border: none; border-radius: var(--radius); padding: 12px; font-weight: 600; cursor: pointer; }
-    .btn-primary:hover { background: var(--accent); }
-
-    /* ── APP ── */
+    
     #app { display: none; }
     header { background: var(--ink); color: var(--bg); padding: 0 40px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
     .logo { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; }
@@ -41,29 +38,24 @@
     .breadcrumb-bar { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 10px 40px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
     .breadcrumb-item { cursor: pointer; color: var(--accent); font-weight: 600; }
     .breadcrumb-item:hover { text-decoration: underline; }
-    .breadcrumb-sep { color: var(--border); }
 
-    main { max-width: 1000px; margin: 0 auto; padding: 32px 24px; }
-    
-    /* 拖拽区域样式 */
-    .upload-area { border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 28px; text-align: center; padding: 40px; cursor: pointer; transition: all 0.2s; }
-    .upload-area.dragover { border-color: var(--accent); background: var(--surface2); transform: scale(1.01); }
-    .upload-title { font-weight: 600; color: var(--ink2); }
+    main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+    .upload-area { border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 28px; text-align: center; padding: 40px; cursor: pointer; transition: 0.2s; }
+    .upload-area.dragover { border-color: var(--accent); background: var(--surface2); }
 
     .toolbar { display: flex; justify-content: space-between; margin-bottom: 16px; align-items: center; }
     .btn-action { background: var(--surface); border: 1px solid var(--border); padding: 7px 14px; border-radius: var(--radius); cursor: pointer; font-size: 12px; font-weight: 600; margin-right: 8px; }
-    .btn-action:hover { border-color: var(--ink); }
 
     .file-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-    .table-head, .file-row { display: grid; grid-template-columns: 40px 1fr 100px 180px 150px; padding: 12px 16px; align-items: center; border-bottom: 1px solid var(--border); }
+    .table-head, .file-row { display: grid; grid-template-columns: 40px 1fr 100px 180px 220px; padding: 12px 16px; align-items: center; border-bottom: 1px solid var(--border); }
     .table-head { background: var(--surface2); font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--ink2); }
     .file-row:hover { background: var(--surface2); }
     .folder-row { color: var(--accent); font-weight: 600; cursor: pointer; }
 
-    .action-btn { background: none; border: 1px solid var(--border); padding: 4px 8px; font-size: 11px; cursor: pointer; border-radius: 3px; transition: 0.2s; }
+    .action-btn { background: none; border: 1px solid var(--border); padding: 4px 8px; font-size: 11px; cursor: pointer; border-radius: 3px; margin-left: 4px; }
     .action-btn:hover { background: var(--ink); color: #fff; }
     .action-btn.del { color: var(--danger); border-color: var(--danger); }
-    .action-btn.del:hover { background: var(--danger); color: #fff; }
+    .action-btn.edit { color: var(--success); border-color: var(--success); }
     
     #toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: #fff; padding: 12px 24px; border-radius: var(--radius); display: none; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 13px; }
   </style>
@@ -72,104 +64,64 @@
 
 <div id="login-screen">
   <div class="login-box">
-    <div class="field-group">
-      <label class="field-label">Worker 地址</label>
-      <input class="field-input" id="inp-worker" placeholder="https://xxx.workers.dev">
-    </div>
-    <div class="field-group">
-      <label class="field-label">访问密钥</label>
-      <input class="field-input" id="inp-key" type="password">
-    </div>
+    <div class="field-group"><label class="field-label">Worker 地址</label><input class="field-input" id="inp-worker" placeholder="https://xxx.workers.dev"></div>
+    <div class="field-group"><label class="field-label">访问密钥</label><input class="field-input" id="inp-key" type="password"></div>
     <button class="btn-primary" onclick="saveConfig()">进入管理站</button>
   </div>
 </div>
 
 <div id="app">
-  <header>
-    <div class="logo"><em>▣</em> FILE MANAGER</div>
-    <button class="btn-action" style="color:white; border:none; background:transparent;" onclick="clearConfig()">退出登录</button>
-  </header>
-
+  <header><div class="logo"><em>▣</em> FILE MANAGER</div><button class="btn-action" style="color:white; border:none; background:transparent;" onclick="clearConfig()">退出</button></header>
   <div class="breadcrumb-bar" id="breadcrumb"></div>
-
   <main>
     <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
-      <div class="upload-title">☁ 点击此处或将文件拖拽至此上传</div>
-      <div style="font-size: 12px; color: var(--ink2); margin-top: 8px;">支持多文件同时上传</div>
+      <div class="upload-title">☁ 点击或拖拽上传到当前目录</div>
       <input type="file" id="file-input" multiple style="display:none" onchange="handleUpload(this.files)">
     </div>
-
     <div class="toolbar">
-      <div>
-        <button class="btn-action" onclick="createFolder()">+ 新建文件夹</button>
-        <button class="btn-action" onclick="refreshFiles()">↺ 刷新列表</button>
-      </div>
-      <input class="field-input" style="width:200px" placeholder="搜索文件名..." oninput="renderFiles(this.value)">
+      <div><button class="btn-action" onclick="createFolder()">+ 新建文件夹</button><button class="btn-action" onclick="refreshFiles()">↺ 刷新</button></div>
+      <input class="field-input" style="width:200px" placeholder="搜索..." oninput="renderFiles(this.value)">
     </div>
-
     <div class="file-table">
-      <div class="table-head">
-        <div></div><div>名称</div><div>大小</div><div>上传时间</div><div style="text-align:right">操作</div>
-      </div>
+      <div class="table-head"><div></div><div>名称</div><div>大小</div><div>上传时间</div><div style="text-align:right">操作</div></div>
       <div id="file-list"></div>
     </div>
   </main>
 </div>
-
 <div id="toast"></div>
 
 <script>
 let CFG = {}, allFiles = [], currentPrefix = '';
 
-// ── 核心逻辑：拖拽功能恢复 ──
-const dropZone = document.getElementById('drop-zone');
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
-  dropZone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); });
-});
-dropZone.addEventListener('dragenter', () => dropZone.classList.add('dragover'));
-dropZone.addEventListener('dragover', () => dropZone.classList.add('dragover'));
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', (e) => {
-  dropZone.classList.remove('dragover');
-  handleUpload(e.dataTransfer.files);
-});
+// 拖拽逻辑
+const dz = document.getElementById('drop-zone');
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dz.addEventListener(e, x => { x.preventDefault(); x.stopPropagation(); }));
+dz.addEventListener('dragover', () => dz.classList.add('dragover'));
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => { dz.classList.remove('dragover'); handleUpload(e.dataTransfer.files); });
 
 function saveConfig() {
   const worker = document.getElementById('inp-worker').value.trim().replace(/\/$/, '');
   const key = document.getElementById('inp-key').value.trim();
-  if (!worker || !key) return alert('请填完整');
+  if (!worker || !key) return;
   CFG = { worker, key };
-  localStorage.setItem('r2_cfg', JSON.stringify(CFG));
+  localStorage.setItem('r2_cfg_v2', JSON.stringify(CFG));
   boot();
 }
+function loadConfig() { const s = localStorage.getItem('r2_cfg_v2'); if (s) { CFG = JSON.parse(s); return true; } return false; }
+function clearConfig() { localStorage.removeItem('r2_cfg_v2'); location.reload(); }
 
-function loadConfig() {
-  const s = localStorage.getItem('r2_cfg');
-  if (s) { CFG = JSON.parse(s); return true; }
-  return false;
-}
-
-function clearConfig() { localStorage.removeItem('r2_cfg'); location.reload(); }
-
-function boot() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  refreshFiles();
-}
+function boot() { document.getElementById('login-screen').style.display = 'none'; document.getElementById('app').style.display = 'block'; refreshFiles(); }
 
 async function refreshFiles() {
   const listEl = document.getElementById('file-list');
-  listEl.innerHTML = '<div style="padding:20px">正在获取文件列表...</div>';
+  listEl.innerHTML = '<div style="padding:20px">加载中...</div>';
   updateBreadcrumb();
   try {
-    const res = await fetch(`${CFG.worker}/list?prefix=${encodeURIComponent(currentPrefix)}`, {
-      headers: { 'X-Auth-Key': CFG.key }
-    });
+    const res = await fetch(`${CFG.worker}/list?prefix=${encodeURIComponent(currentPrefix)}`, { headers: { 'X-Auth-Key': CFG.key } });
     allFiles = await res.json();
     renderFiles();
-  } catch(e) {
-    listEl.innerHTML = '<div style="padding:20px; color:red">连接 Worker 失败，请检查配置。</div>';
-  }
+  } catch(e) { listEl.innerHTML = '<div style="padding:20px; color:red">加载失败</div>'; }
 }
 
 function updateBreadcrumb() {
@@ -177,116 +129,86 @@ function updateBreadcrumb() {
   const parts = currentPrefix.split('/').filter(Boolean);
   let html = `<span class="breadcrumb-item" onclick="goDir('')">根目录</span>`;
   let path = '';
-  parts.forEach(p => {
-    path += p + '/';
-    const thisPath = path;
-    html += ` <span class="breadcrumb-sep">></span> <span class="breadcrumb-item" onclick="goDir('${thisPath}')">${p}</span>`;
-  });
+  parts.forEach(p => { path += p + '/'; html += ` <span style="color:#ccc">></span> <span class="breadcrumb-item" onclick="goDir('${path}')">${p}</span>`; });
   container.innerHTML = html;
 }
-
-function goDir(prefix) { currentPrefix = prefix; refreshFiles(); }
+function goDir(p) { currentPrefix = p; refreshFiles(); }
 
 function renderFiles(query = '') {
   const listEl = document.getElementById('file-list');
   const q = query.toLowerCase();
   const filtered = allFiles.filter(f => f.name.toLowerCase().includes(q));
-
-  if (!filtered.length) {
-    listEl.innerHTML = '<div style="padding:40px; text-align:center; color:#999">目录为空</div>';
-    return;
-  }
+  if (!filtered.length) { listEl.innerHTML = '<div style="padding:40px; text-align:center; color:#999">空</div>'; return; }
 
   listEl.innerHTML = filtered.map(f => {
     const isFolder = f.isFolder;
-    const displayName = isFolder ? f.name.slice(currentPrefix.length) : f.name.slice(currentPrefix.length);
+    const displayName = f.name.slice(currentPrefix.length);
     if (displayName === '.keep') return ''; 
 
-    return `
-      <div class="file-row ${isFolder ? 'folder-row' : ''}" onclick="${isFolder ? `goDir('${f.name}')` : ''}">
-        <div>${isFolder ? '📁' : getFileIcon(f.name)}</div>
-        <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap" title="${displayName}">${displayName}</div>
+    return `<div class="file-row ${isFolder ? 'folder-row' : ''}" onclick="${isFolder ? `goDir('${f.name}')` : ''}">
+        <div>${isFolder ? '📁' : '📄'}</div>
+        <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap">${displayName}</div>
         <div>${isFolder ? '—' : fmtSize(f.size)}</div>
         <div style="font-size:11px; color:#999">${isFolder ? '—' : new Date(f.uploaded).toLocaleString()}</div>
         <div style="text-align:right" onclick="event.stopPropagation()">
-          ${!isFolder ? `<button class="action-btn" onclick="openFile('${f.url}')">查看</button>` : ''}
+          ${!isFolder ? `<button class="action-btn" onclick="window.open('${f.url}')">查看</button>` : ''}
+          <button class="action-btn edit" onclick="renameFile('${f.name}', ${isFolder})">重命名</button>
           <button class="action-btn del" onclick="deleteFile('${f.name}')">删除</button>
         </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
-// ── 核心逻辑：恢复直接查看功能 ──
-function openFile(url) {
-  // 在新窗口打开，浏览器会根据 Content-Type 自动决定预览还是下载
-  window.open(url, '_blank');
+// ── 核心逻辑：重命名功能 ──
+async function renameFile(oldPath, isFolder) {
+  if (isFolder) return alert('文件夹暂不支持直接重命名');
+  const oldName = oldPath.split('/').pop();
+  const newName = prompt('请输入新文件名（包含后缀）:', oldName);
+  if (!newName || newName === oldName) return;
+
+  const newPath = currentPrefix + newName;
+  showToast('正在重命名...');
+
+  try {
+    // 1. 获取原文件数据
+    const res = await fetch(`${CFG.worker}/${encodeURIComponent(oldPath)}`, { headers: { 'X-Auth-Key': CFG.key } });
+    const blob = await res.blob();
+    // 2. 上传为新文件名
+    await fetch(`${CFG.worker}/${encodeURIComponent(newPath)}`, {
+      method: 'PUT',
+      headers: { 'X-Auth-Key': CFG.key, 'Content-Type': blob.type },
+      body: blob
+    });
+    // 3. 删除旧文件
+    await fetch(`${CFG.worker}/${encodeURIComponent(oldPath)}`, { method: 'DELETE', headers: { 'X-Auth-Key': CFG.key } });
+    
+    showToast('重命名成功', 'success');
+    refreshFiles();
+  } catch(e) { showToast('操作失败', 'error'); }
 }
 
 async function handleUpload(files) {
-  if (files.length === 0) return;
   for (const file of files) {
-    showToast(`正在上传: ${file.name}...`);
     const path = currentPrefix + file.name;
-    try {
-      await fetch(`${CFG.worker}/${encodeURIComponent(path)}`, {
-        method: 'PUT',
-        headers: { 
-          'X-Auth-Key': CFG.key, 
-          'Content-Type': file.type || 'application/octet-stream' // 关键：传输正确的类型以便预览
-        },
-        body: file
-      });
-    } catch(e) {
-      showToast(`上传失败: ${file.name}`, 'error');
-    }
+    await fetch(`${CFG.worker}/${encodeURIComponent(path)}`, {
+      method: 'PUT',
+      headers: { 'X-Auth-Key': CFG.key, 'Content-Type': file.type },
+      body: file
+    });
   }
-  showToast('文件已全部处理完成', 'success');
   refreshFiles();
 }
 
 async function createFolder() {
-  const n = prompt('请输入新文件夹名称:');
-  if (!n) return;
-  const path = currentPrefix + n + '/.keep';
-  await fetch(`${CFG.worker}/${encodeURIComponent(path)}`, {
-    method: 'PUT',
-    headers: { 'X-Auth-Key': CFG.key },
-    body: ''
-  });
+  const n = prompt('名称:'); if (!n) return;
+  await fetch(`${CFG.worker}/${encodeURIComponent(currentPrefix+n+'/.keep')}`, { method: 'PUT', headers: { 'X-Auth-Key': CFG.key }, body: '' });
   refreshFiles();
 }
 
-async function deleteFile(path) {
-  if (!confirm('确定要永久删除此项吗？')) return;
-  await fetch(`${CFG.worker}/${encodeURIComponent(path)}`, {
-    method: 'DELETE',
-    headers: { 'X-Auth-Key': CFG.key }
-  });
-  refreshFiles();
-}
+async function deleteFile(p) { if(confirm('确定删除？')) { await fetch(`${CFG.worker}/${encodeURIComponent(p)}`, { method: 'DELETE', headers: { 'X-Auth-Key': CFG.key } }); refreshFiles(); } }
 
-function getFileIcon(name) {
-  const ext = name.split('.').pop().toLowerCase();
-  if (['jpg','jpeg','png','gif','svg','webp'].includes(ext)) return '🖼️';
-  if (['pdf'].includes(ext)) return '📄';
-  if (['mp3','wav','ogg'].includes(ext)) return '🎵';
-  if (['mp4','webm'].includes(ext)) return '🎬';
-  return '📝';
-}
-
-function fmtSize(b) {
-  if (b < 1024) return b + 'B';
-  if (b < 1048576) return (b/1024).toFixed(1) + 'KB';
-  return (b/1048576).toFixed(1) + 'MB';
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.style.display = 'block';
-  setTimeout(() => t.style.display='none', 3000);
-}
-
+function fmtSize(b) { return b < 1048576 ? (b/1024).toFixed(1) + 'KB' : (b/1048576).toFixed(1) + 'MB'; }
+function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; setTimeout(() => t.style.display='none', 3000); }
 window.onload = () => { if (loadConfig()) boot(); };
 </script>
 </body>
