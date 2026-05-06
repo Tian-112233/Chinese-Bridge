@@ -3,101 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>文件管理站 - 移动全适配版</title>
-  <link href="https://gs.jurieo.com/gemini/fonts-googleapis/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>文件管理站 - 终极修复版</title>
+  <link href="https://gs.jurieo.com/gemini/fonts-googleapis/css2?family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f5f2ec;
-      --surface: #ffffff;
-      --surface2: #f0ede6;
-      --border: #e0dbd0;
-      --ink: #1c1a16;
-      --ink2: #5a5650;
-      --accent: #c8441a;
-      --radius: 6px;
-      --shadow: 0 1px 4px rgba(28,26,22,0.08);
-      --success: #2d7a45;
-      --danger: #c8441a;
+      --bg: #f5f2ec; --surface: #ffffff; --surface2: #f0ede6; --border: #e0dbd0;
+      --ink: #1c1a16; --ink2: #5a5650; --accent: #c8441a; --radius: 6px;
+      --shadow: 0 1px 4px rgba(28,26,22,0.08); --success: #2d7a45; --danger: #c8441a;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body { background: var(--bg); color: var(--ink); font-family: 'Sora', sans-serif; min-height: 100vh; overflow-x: hidden; }
-
-    /* ── 登录界面 ── */
-    #login-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; background: var(--bg); z-index: 100; padding: 20px; }
+    
+    /* 登录与导航 */
+    #login-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 100; padding: 20px; }
     .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 30px 24px; width: 100%; max-width: 420px; box-shadow: var(--shadow); }
     .field-group { margin-bottom: 16px; }
-    .field-label { display: block; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); font-weight: 600; margin-bottom: 6px; }
+    .field-label { display: block; font-size: 10px; text-transform: uppercase; color: var(--ink2); font-weight: 600; margin-bottom: 6px; }
     .field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 14px; outline: none; }
     .btn-primary { width: 100%; background: var(--ink); color: var(--bg); border: none; border-radius: var(--radius); padding: 14px; font-weight: 600; cursor: pointer; }
 
-    /* ── 顶部导航 ── */
     #app { display: none; }
     header { background: var(--ink); color: var(--bg); padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
     .logo { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; }
     .logo em { color: var(--accent); font-style: normal; margin-right: 4px; }
 
-    .breadcrumb-bar { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 8px; font-size: 13px; overflow-x: auto; white-space: nowrap; }
-    .breadcrumb-item { color: var(--accent); font-weight: 600; text-decoration: none; }
+    .breadcrumb-bar { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 8px; font-size: 13px; overflow-x: auto; }
+    .breadcrumb-item { color: var(--accent); font-weight: 600; cursor: pointer; }
+    .breadcrumb-sep { color: #aaa; font-weight: normal; } /* 修复图标 */
 
     main { max-width: 1100px; margin: 0 auto; padding: 16px; }
-
-    /* ── 上传区域 ── */
     .upload-area { border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 20px; text-align: center; padding: 30px 16px; cursor: pointer; }
     .upload-area.dragover { border-color: var(--accent); background: var(--surface2); }
-    .upload-title { font-size: 14px; font-weight: 600; color: var(--ink2); }
-
+    
     .toolbar { display: flex; justify-content: space-between; margin-bottom: 16px; align-items: center; flex-wrap: wrap; gap: 12px; }
-    .btn-action { background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; border-radius: var(--radius); cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s; }
+    .btn-action { background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; border-radius: var(--radius); cursor: pointer; font-size: 12px; font-weight: 600; }
 
-    /* ── 文件表格 (响应式核心) ── */
     .file-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-    
-    /* 桌面端列配置 */
     .table-head, .file-row { display: grid; grid-template-columns: 40px 1fr 100px 180px 220px; padding: 12px 16px; align-items: center; border-bottom: 1px solid var(--border); }
-    .table-head { background: var(--surface2); font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--ink2); }
-    
-    .file-name-cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 10px; font-size: 14px; }
-    .file-info-small { font-size: 11px; color: var(--ink2); font-family: 'JetBrains Mono'; }
+    .table-head { background: var(--surface2); font-size: 10px; font-weight: 600; color: var(--ink2); }
 
     .action-group { display: flex; gap: 6px; justify-content: flex-end; }
-    .action-btn { background: none; border: 1px solid var(--border); padding: 6px 10px; font-size: 12px; cursor: pointer; border-radius: 4px; }
+    .action-btn { background: none; border: 1px solid var(--border); padding: 6px 10px; font-size: 11px; cursor: pointer; border-radius: 4px; transition: 0.2s; }
+    .action-btn:hover { background: var(--ink); color: #fff; }
 
-    /* 📱 手机端适配 (关键修改) */
+    /* 📱 手机端适配修复 */
     @media (max-width: 768px) {
-      header { padding: 0 12px; }
-      .table-head { display: none; } /* 手机端隐藏表头 */
-      
-      .file-row {
-        grid-template-columns: 32px 1fr; /* 仅保留图标和名字 */
-        grid-template-rows: auto auto; 
-        padding: 16px;
-        gap: 8px 12px;
-      }
-
-      .file-name-cell { grid-column: 2; white-space: normal; word-break: break-all; font-weight: 600; }
-      
-      /* 将大小和时间放在名字下面 */
-      .file-size-cell, .file-date-cell { 
-        grid-column: 2; 
-        font-size: 11px; 
-        color: var(--ink2);
-        display: inline-block;
-        margin-right: 10px;
-      }
-      
-      /* 按钮组移动到最下方并左右撑满 */
-      .action-group { 
-        grid-column: 1 / span 2; 
-        justify-content: flex-start; 
-        margin-top: 8px;
-        flex-wrap: wrap;
-      }
-      
-      .action-btn { flex: 1; text-align: center; padding: 8px 4px; min-width: 70px; }
+      .table-head { display: none; }
+      .file-row { grid-template-columns: 32px 1fr; padding: 16px; gap: 4px 12px; }
+      .file-name-cell { grid-column: 2; font-weight: 600; font-size: 14px; white-space: normal; word-break: break-all; }
+      .file-size-cell, .file-date-cell { grid-column: 2; display: inline-block; font-size: 11px; color: var(--ink2); }
+      .action-group { grid-column: 1 / span 2; justify-content: flex-start; margin-top: 10px; flex-wrap: wrap; }
+      .action-btn { flex: 1; text-align: center; min-width: 65px; }
     }
-    
-    #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 30px; display: none; z-index: 1000; font-size: 13px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+    #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 30px; display: none; z-index: 1000; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
@@ -106,21 +65,21 @@
   <div class="login-box">
     <div class="field-group"><label class="field-label">Worker API</label><input class="field-input" id="inp-worker" placeholder="https://xxx.workers.dev"></div>
     <div class="field-group"><label class="field-label">AUTH_KEY</label><input class="field-input" id="inp-key" type="password"></div>
-    <button class="btn-primary" onclick="saveConfig()">登录管理站</button>
+    <button class="btn-primary" onclick="saveConfig()">登录管理系统</button>
   </div>
 </div>
 
 <div id="app">
-  <header><div class="logo"><em>▣</em> R2 MANAGER</div><button onclick="clearConfig()" style="background:none; border:none; color:white; font-size:12px;">退出</button></header>
+  <header><div class="logo"><em>▣</em> R2 MANAGER</div><button onclick="clearConfig()" style="background:none; border:none; color:white; font-size:12px;">退出登录</button></header>
   <div class="breadcrumb-bar" id="breadcrumb"></div>
   <main>
     <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
-      <div class="upload-title">☁ 点击或拖拽上传</div>
+      <div class="upload-title">☁ 点击或拖拽上传文件</div>
       <input type="file" id="file-input" multiple style="display:none" onchange="handleUpload(this.files)">
     </div>
     <div class="toolbar">
       <div><button class="btn-action" onclick="createFolder()">+ 文件夹</button><button class="btn-action" onclick="refreshFiles()">刷新</button></div>
-      <input class="field-input" style="width:160px; height:36px;" placeholder="搜索..." oninput="renderFiles(this.value)">
+      <input class="field-input" style="width:160px; height:36px;" placeholder="搜索文件..." oninput="renderFiles(this.value)">
     </div>
     <div class="file-table" id="file-list"></div>
   </main>
@@ -141,23 +100,23 @@ function saveConfig() {
   const k = document.getElementById('inp-key').value.trim();
   if (!w || !k) return;
   CFG = { worker: w, key: k };
-  localStorage.setItem('r2_v3', JSON.stringify(CFG));
+  localStorage.setItem('r2_v4', JSON.stringify(CFG));
   boot();
 }
-function loadConfig() { const s = localStorage.getItem('r2_v3'); if(s){ CFG=JSON.parse(s); return true; } return false; }
-function clearConfig() { localStorage.removeItem('r2_v3'); location.reload(); }
+function loadConfig() { const s = localStorage.getItem('r2_v4'); if(s){ CFG=JSON.parse(s); return true; } return false; }
+function clearConfig() { localStorage.removeItem('r2_v4'); location.reload(); }
 
 function boot() { document.getElementById('login-screen').style.display='none'; document.getElementById('app').style.display='block'; refreshFiles(); }
 
 async function refreshFiles() {
   const el = document.getElementById('file-list');
-  el.innerHTML = '<div style="padding:30px;text-align:center;color:#999;">读取中...</div>';
+  el.innerHTML = '<div style="padding:30px;text-align:center;color:#999;">同步云端数据...</div>';
   updateBread();
   try {
     const res = await fetch(`${CFG.worker}/list?prefix=${encodeURIComponent(currentPrefix)}`, { headers: {'X-Auth-Key': CFG.key} });
     allFiles = await res.json();
     renderFiles();
-  } catch(e) { el.innerHTML = '<div style="padding:30px;color:red;">Worker连接失败</div>'; }
+  } catch(e) { el.innerHTML = '<div style="padding:30px;color:red;">连接错误</div>'; }
 }
 
 function updateBread() {
@@ -165,7 +124,7 @@ function updateBread() {
   const parts = currentPrefix.split('/').filter(Boolean);
   let h = `<span class="breadcrumb-item" onclick="goDir('')">根目录</span>`;
   let p = '';
-  parts.forEach(x => { p += x + '/'; h += ` <span style="color:#ccc">/</span> <span class="breadcrumb-item" onclick="goDir('${p}')">${x}</span>`; });
+  parts.forEach(x => { p += x + '/'; h += ` <span class="breadcrumb-sep">/</span> <span class="breadcrumb-item" onclick="goDir('${p}')">${x}</span>`; });
   b.innerHTML = h;
 }
 function goDir(p) { currentPrefix = p; refreshFiles(); }
@@ -175,7 +134,7 @@ function renderFiles(query='') {
   const q = query.toLowerCase();
   const filtered = allFiles.filter(f => f.name.toLowerCase().includes(q));
   
-  if(!filtered.length) { el.innerHTML = '<div style="padding:40px;text-align:center;color:#999">空目录</div>'; return; }
+  if(!filtered.length) { el.innerHTML = '<div style="padding:40px;text-align:center;color:#999">暂无文件</div>'; return; }
 
   let html = `<div class="table-head"><div></div><div>名称</div><div>大小</div><div>修改时间</div><div style="text-align:right">操作</div></div>`;
   html += filtered.map(f => {
@@ -189,7 +148,7 @@ function renderFiles(query='') {
       <div class="file-size-cell">${isF?'—':fmtSize(f.size)}</div>
       <div class="file-date-cell">${isF?'—':new Date(f.uploaded).toLocaleDateString()}</div>
       <div class="action-group" onclick="event.stopPropagation()">
-        ${!isF ? `<button class="action-btn" onclick="window.open('${f.url}')">预览</button>` : ''}
+        ${!isF ? `<button class="action-btn" onclick="previewFile('${f.url}','${dName}')">预览</button>` : ''}
         ${!isF ? `<button class="action-btn" onclick="downloadFile('${f.url}','${dName}')">下载</button>` : ''}
         <button class="action-btn" style="color:var(--success)" onclick="renameFile('${f.name}')">改名</button>
         <button class="action-btn" style="color:var(--danger)" onclick="delFile('${f.name}')">删除</button>
@@ -199,45 +158,56 @@ function renderFiles(query='') {
   el.innerHTML = html;
 }
 
-// ── 核心功能实现 ──
+// ── 预览逻辑：区分 PPT 和普通文件 ──
+function previewFile(url, name) {
+  const ext = name.split('.').pop().toLowerCase();
+  if (['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx'].includes(ext)) {
+    // 使用微软在线预览服务，无需下载即可查看 PPT
+    const msPreview = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
+    window.open(msPreview, '_blank');
+  } else {
+    window.open(url, '_blank');
+  }
+}
+
+function downloadFile(url, name) {
+  const a = document.createElement('a'); a.href = url; a.download = name; a.target = '_blank';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
 async function renameFile(oldP) {
   const oldN = oldP.split('/').pop();
-  const newN = prompt('新文件名:', oldN);
+  const newN = prompt('重命名为:', oldN);
   if(!newN || newN === oldN) return;
-  showT('正在重命名...');
+  showT('处理中...');
   try {
     const res = await fetch(`${CFG.worker}/rename`, {
       method:'POST', headers:{'X-Auth-Key':CFG.key,'Content-Type':'application/json'},
       body: JSON.stringify({ oldPath: oldP, newPath: currentPrefix + newN })
     });
-    if(res.ok) { showT('改名成功','success'); refreshFiles(); }
-  } catch(e) { showT('改名失败','error'); }
-}
-
-function downloadFile(url, name) {
-  const a = document.createElement('a'); a.href = url; a.download = name;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    if(res.ok) { showT('改名完成','success'); refreshFiles(); }
+  } catch(e) { showT('操作失败','error'); }
 }
 
 async function handleUpload(files) {
   for(let f of files) {
-    showT(`上传中: ${f.name}`);
+    showT(`上传: ${f.name}`);
     await fetch(`${CFG.worker}/${encodeURIComponent(currentPrefix + f.name)}`, {
       method:'PUT', headers:{'X-Auth-Key':CFG.key,'Content-Type':f.type}, body:f
     });
   }
-  showT('上传完成'); refreshFiles();
+  showT('全部完成'); refreshFiles();
 }
 
 async function createFolder() {
-  const n = prompt('文件夹名:'); if(!n) return;
+  const n = prompt('新文件夹名称:'); if(!n) return;
   await fetch(`${CFG.worker}/${encodeURIComponent(currentPrefix+n+'/.keep')}`, { method:'PUT', headers:{'X-Auth-Key':CFG.key}, body:'' });
   refreshFiles();
 }
 
-async function delFile(p) { if(confirm('删除此项？')){ await fetch(`${CFG.worker}/${encodeURIComponent(p)}`, { method:'DELETE', headers:{'X-Auth-Key':CFG.key} }); refreshFiles(); } }
+async function delFile(p) { if(confirm('确认彻底删除？')){ await fetch(`${CFG.worker}/${encodeURIComponent(p)}`, { method:'DELETE', headers:{'X-Auth-Key':CFG.key} }); refreshFiles(); } }
 
-function fmtSize(b) { return b < 1048576 ? (b/1024).toFixed(1)+'K' : (b/1048576).toFixed(1)+'M'; }
+function fmtSize(b) { if(!b) return '0B'; return b < 1048576 ? (b/1024).toFixed(1)+'K' : (b/1048576).toFixed(1)+'M'; }
 function showT(m) { const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); }
 window.onload = () => { if(loadConfig()) boot(); };
 </script>
