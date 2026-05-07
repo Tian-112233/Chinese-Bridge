@@ -3,62 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>R2 Cloud Manager - Final</title>
-  <link href="https://gs.jurieo.com/gemini/fonts-googleapis/css2?family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>R2 Cloud Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f5f2ec; --surface: #ffffff; --surface2: #f0ede6; --border: #e0dbd0;
-      --ink: #1c1a16; --ink2: #5a5650; --accent: #c8441a; --radius: 8px;
-      --shadow: 0 2px 8px rgba(0,0,0,0.05); --success: #2d7a45; --danger: #c8441a;
+      --bg:#f5f2ec; --surface:#fff; --surface2:#f0ede6; --border:#e0dbd0;
+      --ink:#1c1a16; --ink2:#5a5650; --accent:#c8441a; --radius:8px;
+      --shadow:0 2px 8px rgba(0,0,0,.05); --success:#2d7a45; --danger:#c8441a;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg); color: var(--ink); font-family: 'Sora', sans-serif; min-height: 100vh; line-height: 1.5; }
-    
-    #login-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 100; padding: 20px; }
-    .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px 30px; width: 100%; max-width: 400px; box-shadow: var(--shadow); }
-    .field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; font-family: 'JetBrains Mono', monospace; margin: 8px 0 20px; outline: none; font-size: 14px; }
-    .btn-primary { width: 100%; background: var(--ink); color: var(--bg); border: none; border-radius: var(--radius); padding: 14px; font-weight: 700; cursor: pointer; }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    body{background:var(--bg);color:var(--ink);font-family:'Sora',sans-serif;min-height:100vh;line-height:1.5}
 
-    #app { display: none; }
-    header { background: var(--ink); color: var(--bg); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
-    .breadcrumb-bar { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; gap: 8px; font-size: 13px; overflow-x: auto; white-space: nowrap; }
-    .breadcrumb-item { color: var(--accent); font-weight: 600; cursor: pointer; }
-    .breadcrumb-sep { color: #aaa; font-weight: normal; }
+    /* LOGIN */
+    #login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:100;padding:20px}
+    .login-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:40px 30px;width:100%;max-width:400px;box-shadow:var(--shadow)}
+    .field-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-family:'JetBrains Mono',monospace;margin:8px 0 20px;outline:none;font-size:14px}
+    .btn-primary{width:100%;background:var(--ink);color:var(--bg);border:none;border-radius:var(--radius);padding:14px;font-weight:700;cursor:pointer;font-size:15px}
 
-    main { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    .upload-area { border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 24px; text-align: center; padding: 40px 20px; cursor: pointer; transition: 0.3s; }
-    .upload-area:hover, .upload-area.dragover { border-color: var(--accent); background: var(--surface2); }
-    
-    .toolbar { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; flex-wrap: wrap; gap: 15px; }
-    .btn-action { background: var(--surface); border: 1px solid var(--border); padding: 10px 16px; border-radius: var(--radius); cursor: pointer; font-size: 13px; font-weight: 600; }
+    /* APP */
+    #app{display:none}
+    header{background:var(--ink);color:var(--bg);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+    .breadcrumb-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:8px;font-size:13px;overflow-x:auto;white-space:nowrap}
+    .bc-item{color:var(--accent);font-weight:600;cursor:pointer}
+    .bc-sep{color:#aaa}
 
-    .file-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-    .table-head, .file-row { display: grid; grid-template-columns: 50px 1fr 100px 180px 240px; padding: 14px 20px; align-items: center; border-bottom: 1px solid var(--border); }
-    .table-head { background: var(--surface2); font-size: 11px; font-weight: 700; color: var(--ink2); text-transform: uppercase; }
-    .file-row:hover { background: var(--surface2); }
+    main{max-width:1200px;margin:0 auto;padding:20px}
+    .upload-area{border:2px dashed var(--border);border-radius:var(--radius);background:var(--surface);margin-bottom:24px;text-align:center;padding:40px 20px;cursor:pointer;transition:.3s}
+    .upload-area:hover,.upload-area.dragover{border-color:var(--accent);background:var(--surface2)}
 
-    .action-group { display: flex; gap: 6px; justify-content: flex-end; }
-    .action-btn { background: none; border: 1px solid var(--border); padding: 6px 12px; font-size: 12px; cursor: pointer; border-radius: 4px; transition: 0.2s; }
-    .action-btn:hover { background: var(--ink); color: #fff; }
+    .toolbar{display:flex;justify-content:space-between;margin-bottom:20px;align-items:center;flex-wrap:wrap;gap:15px}
+    .btn-action{background:var(--surface);border:1px solid var(--border);padding:10px 16px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:600}
 
-    /* 手机端适配 */
-    @media (max-width: 850px) {
-      .table-head { display: none; }
-      .file-row { grid-template-columns: 40px 1fr; padding: 16px; gap: 6px 12px; }
-      .file-name-cell { grid-column: 2; font-weight: 700; font-size: 15px; word-break: break-all; }
-      .meta-info { grid-column: 2; font-size: 11px; color: var(--ink2); display: flex; gap: 10px; }
-      .action-group { grid-column: 1 / span 2; justify-content: flex-start; margin-top: 10px; flex-wrap: wrap; gap: 8px; }
-      .action-btn { flex: 1; text-align: center; min-width: 70px; padding: 10px 0; }
+    .file-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+    .table-head,.file-row{display:grid;grid-template-columns:50px 1fr 100px 160px 220px;padding:14px 20px;align-items:center;border-bottom:1px solid var(--border)}
+    .table-head{background:var(--surface2);font-size:11px;font-weight:700;color:var(--ink2);text-transform:uppercase}
+    .file-row:hover{background:var(--surface2)}
+    .file-row.is-folder{cursor:pointer}
+
+    .action-group{display:flex;gap:6px;justify-content:flex-end}
+    .action-btn{background:none;border:1px solid var(--border);padding:6px 12px;font-size:12px;cursor:pointer;border-radius:4px;transition:.2s;font-family:'Sora',sans-serif}
+    .action-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .action-btn.danger{color:var(--danger)}
+    .action-btn.danger:hover{background:var(--danger);border-color:var(--danger)}
+
+    @media(max-width:850px){
+      .table-head{display:none}
+      .file-row{grid-template-columns:40px 1fr;padding:16px;gap:6px 12px}
+      .file-name-cell{grid-column:2;font-weight:700;font-size:15px;word-break:break-all}
+      .meta-cell{grid-column:2;font-size:11px;color:var(--ink2);display:flex;gap:10px}
+      .action-group{grid-column:1/span 2;justify-content:flex-start;margin-top:10px;flex-wrap:wrap;gap:8px}
+      .action-btn{flex:1;text-align:center;min-width:70px;padding:10px 0}
     }
 
-    #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 14px 24px; border-radius: 40px; display: none; z-index: 2000; font-size: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    /* OVERLAY for folder delete progress */
+    #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
+    #overlay.show{display:flex}
+    .overlay-box{background:#fff;border-radius:12px;padding:32px 40px;text-align:center;min-width:260px}
+    .overlay-box p{margin-top:12px;color:var(--ink2);font-size:14px}
+
+    #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:14px 24px;border-radius:40px;display:none;z-index:2000;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,.3);white-space:nowrap}
   </style>
 </head>
 <body>
 
 <div id="login-screen">
   <div class="login-box">
-    <h2 style="margin-bottom:20px; text-align:center;">R2 Cloud Manager</h2>
+    <h2 style="margin-bottom:20px;text-align:center">R2 Cloud Manager</h2>
     <input class="field-input" id="inp-worker" placeholder="Worker URL (https://...)">
     <input class="field-input" id="inp-key" type="password" placeholder="Access Key">
     <button class="btn-primary" onclick="saveConfig()">登录系统</button>
@@ -66,187 +76,311 @@
 </div>
 
 <div id="app">
-  <header><div class="logo"><em>▣</em> R2 STORAGE</div><button onclick="clearConfig()" style="background:none; border:none; color:white; font-size:12px; cursor:pointer;">退出</button></header>
+  <header>
+    <div style="font-weight:700;letter-spacing:.1em">▣ R2 STORAGE</div>
+    <button onclick="clearConfig()" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:12px;cursor:pointer">退出</button>
+  </header>
   <div class="breadcrumb-bar" id="breadcrumb"></div>
   <main>
     <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
-      <div style="font-weight:700; font-size:16px;">☁ 点击或拖拽上传到当前目录</div>
+      <div style="font-weight:700;font-size:16px">☁ 点击或拖拽上传到当前目录</div>
+      <div style="font-size:13px;color:var(--ink2);margin-top:6px">支持多文件，无大小限制</div>
       <input type="file" id="file-input" multiple style="display:none" onchange="handleUpload(this.files)">
     </div>
     <div class="toolbar">
-      <div><button class="btn-action" onclick="createFolder()">+ 文件夹</button><button class="btn-action" onclick="refreshFiles()">↺ 刷新</button></div>
-      <input class="field-input" style="width:200px; height:40px; margin:0;" placeholder="搜索..." oninput="renderFiles(this.value)">
+      <div style="display:flex;gap:8px">
+        <button class="btn-action" onclick="createFolder()">+ 文件夹</button>
+        <button class="btn-action" onclick="refreshFiles()">↺ 刷新</button>
+      </div>
+      <input class="field-input" style="width:200px;height:40px;margin:0" placeholder="搜索文件名..." oninput="renderFiles(this.value)">
     </div>
     <div class="file-table" id="file-list"></div>
   </main>
 </div>
+
+<div id="overlay">
+  <div class="overlay-box">
+    <div style="font-size:32px">⏳</div>
+    <p id="overlay-msg">处理中，请稍候...</p>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 let CFG = {}, allFiles = [], currentPrefix = '';
 
-// 拖拽逻辑
+// ── 拖拽 ──
 const dz = document.getElementById('drop-zone');
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dz.addEventListener(e, x => { x.preventDefault(); x.stopPropagation(); }));
+['dragenter','dragover','dragleave','drop'].forEach(e => dz.addEventListener(e, x => { x.preventDefault(); x.stopPropagation(); }));
 dz.addEventListener('dragover', () => dz.classList.add('dragover'));
 dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
 dz.addEventListener('drop', e => { dz.classList.remove('dragover'); handleUpload(e.dataTransfer.files); });
 
+// ── Config ──
 function saveConfig() {
   const w = document.getElementById('inp-worker').value.trim().replace(/\/$/, '');
   const k = document.getElementById('inp-key').value.trim();
   if (!w || !k) return;
   CFG = { worker: w, key: k };
-  localStorage.setItem('r2_v7', JSON.stringify(CFG));
+  localStorage.setItem('r2_v8', JSON.stringify(CFG));
   boot();
 }
-function loadConfig() { const s = localStorage.getItem('r2_v7'); if(s){ CFG=JSON.parse(s); return true; } return false; }
-function clearConfig() { localStorage.removeItem('r2_v7'); location.reload(); }
-function boot() { document.getElementById('login-screen').style.display='none'; document.getElementById('app').style.display='block'; refreshFiles(); }
+function loadConfig() { try { const s = localStorage.getItem('r2_v8'); if (s) { CFG = JSON.parse(s); return true; } } catch(e){} return false; }
+function clearConfig() { localStorage.removeItem('r2_v8'); location.reload(); }
+function boot() { document.getElementById('login-screen').style.display = 'none'; document.getElementById('app').style.display = 'block'; refreshFiles(); }
 
+// ── API helpers ──
+function authHeaders(extra) { return { 'X-Auth-Key': CFG.key, ...extra }; }
+
+async function apiList(prefix) {
+  const res = await fetch(`${CFG.worker}/list?prefix=${encodeURIComponent(prefix)}`, { headers: authHeaders() });
+  return res.json();
+}
+
+async function apiPut(key, body, contentType) {
+  return fetch(`${CFG.worker}/${encodeURIComponent(key)}`, {
+    method: 'PUT', headers: authHeaders({ 'Content-Type': contentType || 'application/octet-stream' }), body
+  });
+}
+
+async function apiDelete(key) {
+  return fetch(`${CFG.worker}/${encodeURIComponent(key)}`, {
+    method: 'DELETE', headers: authHeaders()
+  });
+}
+
+async function apiRename(oldPath, newPath) {
+  return fetch(`${CFG.worker}/rename`, {
+    method: 'POST',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ oldPath, newPath })
+  });
+}
+
+// ── 列出某前缀下所有文件（递归，用于文件夹删除/改名）──
+async function listAllUnder(prefix) {
+  // 用不带 delimiter 的列表获取所有文件
+  const res = await fetch(`${CFG.worker}/list-all?prefix=${encodeURIComponent(prefix)}`, { headers: authHeaders() });
+  return res.json(); // 返回 [{name, size, ...}]
+}
+
+// ── Refresh ──
 async function refreshFiles() {
   const el = document.getElementById('file-list');
-  el.innerHTML = '<div style="padding:40px;text-align:center;color:#999;">同步中...</div>';
+  el.innerHTML = '<div style="padding:40px;text-align:center;color:#999">同步中...</div>';
   updateBread();
   try {
-    const res = await fetch(`${CFG.worker}/list?prefix=${encodeURIComponent(currentPrefix)}`, { headers: {'X-Auth-Key': CFG.key} });
-    allFiles = await res.json();
+    allFiles = await apiList(currentPrefix);
     renderFiles();
-  } catch(e) { el.innerHTML = '<div style="padding:40px;text-align:center;color:red;">连接失败</div>'; }
+  } catch(e) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:red">连接失败，请检查 Worker 地址</div>';
+  }
 }
 
 function updateBread() {
   const b = document.getElementById('breadcrumb');
   const parts = currentPrefix.split('/').filter(Boolean);
-  let h = `<span class="breadcrumb-item" onclick="goDir('')">根目录</span>`;
+  let h = `<span class="bc-item" onclick="goDir('')">根目录</span>`;
   let p = '';
-  parts.forEach(x => { p += x + '/'; h += ` <span class="breadcrumb-sep">/</span> <span class="breadcrumb-item" onclick="goDir('${p}')">${x}</span>`; });
+  parts.forEach(x => { p += x + '/'; h += ` <span class="bc-sep">/</span> <span class="bc-item" onclick="goDir('${escAttr(p)}')">${x}</span>`; });
   b.innerHTML = h;
 }
+
 function goDir(p) { currentPrefix = p; refreshFiles(); }
 
-function renderFiles(query='') {
+// ── Render ──
+function renderFiles(query = '') {
   const el = document.getElementById('file-list');
   const q = query.toLowerCase();
-  const filtered = allFiles.filter(f => f.name.toLowerCase().includes(q));
-  
-  if(!filtered.length) { el.innerHTML = '<div style="padding:50px;text-align:center;color:#999">空</div>'; return; }
+  const filtered = allFiles.filter(f => {
+    // 取显示名（去掉当前前缀部分）
+    const disp = displayName(f);
+    return disp && disp !== '.keep' && disp.toLowerCase().includes(q);
+  });
+
+  if (!filtered.length) {
+    el.innerHTML = '<div style="padding:50px;text-align:center;color:#999">当前目录为空</div>';
+    return;
+  }
 
   let html = `<div class="table-head"><div></div><div>名称</div><div>大小</div><div>修改日期</div><div style="text-align:right">操作</div></div>`;
   html += filtered.map(f => {
     const isF = f.isFolder;
-    const dName = f.name.slice(currentPrefix.length);
-    if(dName === '.keep') return '';
-    
-    return `<div class="file-row ${isF?'folder-row':''}" onclick="${isF?`goDir('${f.name}')`:''}">
-      <div style="font-size:20px">${isF?'📁':getFileIcon(dName)}</div>
-      <div class="file-name-cell">${dName}</div>
-      <div class="meta-info">
-        <span>大小: ${isF?'—':fmtSize(f.size)}</span>
-        <span>日期: ${isF?'—':new Date(f.uploaded).toLocaleDateString()}</span>
+    const dName = displayName(f);
+    // 文件夹的 fullKey 去掉末尾 /，文件直接用 name
+    const fullKey = isF ? f.name.replace(/\/$/, '') : f.name;
+
+    return `<div class="file-row${isF ? ' is-folder' : ''}" onclick="${isF ? `goDir('${escAttr(f.name)}')` : ''}">
+      <div style="font-size:20px">${isF ? '📁' : getIcon(dName)}</div>
+      <div class="file-name-cell">${dName.replace(/\/$/, '')}</div>
+      <div class="meta-cell">
+        <span>${isF ? '文件夹' : fmtSize(f.size)}</span>
+        <span>${isF ? '' : fmtDate(f.uploaded)}</span>
       </div>
       <div class="action-group" onclick="event.stopPropagation()">
-        ${!isF ? `<button class="action-btn" onclick="previewFile('${f.url}','${dName}')">预览</button>` : ''}
-        ${!isF ? `<button class="action-btn" onclick="downloadFile('${f.url}','${dName}')">下载</button>` : ''}
-        <button class="action-btn" style="color:var(--success)" onclick="renameFile('${f.name}')">改名</button>
-        <button class="action-btn" style="color:var(--danger)" onclick="delFile('${f.name}')">删除</button>
+        ${!isF ? `<button class="action-btn" onclick="previewFile('${escAttr(f.url)}','${escAttr(dName)}')">预览</button>` : ''}
+        ${!isF ? `<button class="action-btn" onclick="dlFile('${escAttr(f.url)}','${escAttr(dName)}')">下载</button>` : ''}
+        <button class="action-btn" onclick="doRename('${escAttr(fullKey)}','${isF}')">改名</button>
+        <button class="action-btn danger" onclick="doDelete('${escAttr(fullKey)}','${isF}')">删除</button>
       </div>
     </div>`;
   }).join('');
   el.innerHTML = html;
 }
 
-function getFileIcon(n) {
-  const e = n.split('.').pop().toLowerCase();
-  if(['mp4','mov','webm'].includes(e)) return '🎬';
-  if(['mp3','wav','m4a'].includes(e)) return '🎵';
-  if(['ppt','pptx'].includes(e)) return '📊';
-  if(['jpg','png','webp','gif'].includes(e)) return '🖼️';
-  if(['pdf'].includes(e)) return '📄';
+// 取文件在当前目录的显示名
+function displayName(f) {
+  return f.name.slice(currentPrefix.length);
+}
+
+function getIcon(n) {
+  const e = (n.split('.').pop() || '').toLowerCase();
+  if (['mp4','mov','webm'].includes(e)) return '🎬';
+  if (['mp3','wav','m4a','ogg','flac'].includes(e)) return '🎵';
+  if (['ppt','pptx'].includes(e)) return '📊';
+  if (['jpg','jpeg','png','webp','gif'].includes(e)) return '🖼️';
+  if (['pdf'].includes(e)) return '📄';
   return '📝';
 }
 
+function escAttr(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+// ── 预览 & 下载 ──
 function previewFile(url, name) {
-  const e = name.split('.').pop().toLowerCase();
+  const e = (name.split('.').pop() || '').toLowerCase();
   if (['ppt','pptx','doc','docx','xls','xlsx'].includes(e)) {
-    window.open(`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}&wdAr=0`, '_blank');
+    window.open(`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`, '_blank');
   } else {
     window.open(url, '_blank');
   }
 }
-
-function downloadFile(url, name) {
+function dlFile(url, name) {
   const a = document.createElement('a'); a.href = url; a.download = name; a.target = '_blank';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
-// ── 重命名逻辑（修复版）──
-async function renameFile(oldP) {
-  // oldP 是完整路径（如 folder/file.ppt），取最后一段作为显示名
-  const parts = oldP.split('/');
-  const oldN = parts[parts.length - 1];
-  const newN = prompt('输入新名称:', oldN);
-  if (!newN || newN.trim() === '' || newN === oldN) return;
+// ── 改名 ──
+async function doRename(fullKey, isFolder) {
+  // fullKey: 完整路径，不含末尾 /
+  // 取最后一段作为当前名
+  const parts = fullKey.split('/');
+  const oldName = parts[parts.length - 1];
+  const newName = prompt('输入新名称:', oldName);
+  if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
 
-  // 新路径 = 原路径的目录部分 + 新文件名
-  const dir = parts.slice(0, -1).join('/');
-  const newP = dir ? dir + '/' + newN.trim() : newN.trim();
+  const parentPath = parts.slice(0, -1).join('/');
+  const newKey = parentPath ? parentPath + '/' + newName.trim() : newName.trim();
 
-  showT('正在重命名...');
-  try {
-    const res = await fetch(`${CFG.worker}/rename`, {
-      method: 'POST',
-      headers: { 'X-Auth-Key': CFG.key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ oldPath: oldP, newPath: newP })
-    });
-    if (res.ok) {
-      showT('重命名成功');
+  if (isFolder === 'true' || isFolder === true) {
+    // 文件夹改名：列出所有子文件，逐个复制到新路径再删旧的
+    showOverlay('正在重命名文件夹...');
+    try {
+      const children = await listAllUnder(fullKey + '/');
+      let done = 0;
+      for (const child of children) {
+        const childNewKey = newKey + '/' + child.name.slice(fullKey.length + 1);
+        await apiRename(child.name, childNewKey);
+        done++;
+        showOverlay(`重命名中... ${done}/${children.length}`);
+      }
+      hideOverlay();
+      showT('文件夹已重命名');
       await refreshFiles();
-    } else {
-      const msg = await res.text();
-      showT('失败: ' + msg);
-    }
-  } catch(e) { showT('网络错误'); }
-}
-
-async function handleUpload(files) {
-  for(let f of files) {
-    showT(`上传: ${f.name}`);
-    await fetch(`${CFG.worker}/${encodeURIComponent(currentPrefix + f.name)}`, {
-      method:'PUT', headers:{'X-Auth-Key':CFG.key,'Content-Type':f.type}, body:f
-    });
+    } catch(e) { hideOverlay(); showT('失败: ' + e.message); }
+  } else {
+    // 普通文件改名
+    showT('正在重命名...');
+    try {
+      const res = await apiRename(fullKey, newKey);
+      if (res.ok) { showT('重命名成功'); await refreshFiles(); }
+      else { showT('失败: ' + await res.text()); }
+    } catch(e) { showT('网络错误'); }
   }
-  showT('完成'); refreshFiles();
 }
 
-async function createFolder() {
-  const n = prompt('文件夹名:'); if(!n) return;
-  await fetch(`${CFG.worker}/${encodeURIComponent(currentPrefix+n+'/.keep')}`, { method:'PUT', headers:{'X-Auth-Key':CFG.key}, body:'' });
-  refreshFiles();
-}
+// ── 删除 ──
+async function doDelete(fullKey, isFolder) {
+  const name = fullKey.split('/').pop();
 
-async function delFile(p) {
-  const name = p.split('/').pop();
-  if (!confirm(`确认删除「${name}」？`)) return;
-  showT('正在删除...');
-  try {
-    const res = await fetch(`${CFG.worker}/${encodeURIComponent(p)}`, {
-      method: 'DELETE', headers: { 'X-Auth-Key': CFG.key }
-    });
-    if (res.ok) {
-      allFiles = allFiles.filter(f => f.name !== p);
-      renderFiles();
-      showT('已删除');
+  if (isFolder === 'true' || isFolder === true) {
+    if (!confirm(`确认删除文件夹「${name}」及其所有内容？此操作不可撤销！`)) return;
+    showOverlay('正在列出文件夹内容...');
+    try {
+      const children = await listAllUnder(fullKey + '/');
+      let done = 0;
+      for (const child of children) {
+        await apiDelete(child.name);
+        done++;
+        showOverlay(`删除中... ${done}/${children.length}`);
+      }
+      hideOverlay();
+      showT(`已删除 ${done} 个文件`);
       await refreshFiles();
-    } else {
-      showT('删除失败');
-    }
-  } catch(e) { showT('网络错误'); }
+    } catch(e) { hideOverlay(); showT('失败: ' + e.message); }
+  } else {
+    if (!confirm(`确认删除「${name}」？`)) return;
+    showT('正在删除...');
+    try {
+      const res = await apiDelete(fullKey);
+      if (res.ok) {
+        // 立刻从本地移除，再拉新列表
+        allFiles = allFiles.filter(f => f.name !== fullKey && f.name !== fullKey + '/');
+        renderFiles();
+        showT('已删除');
+        await refreshFiles();
+      } else { showT('删除失败'); }
+    } catch(e) { showT('网络错误'); }
+  }
 }
 
-function fmtSize(b) { return b < 1048576 ? (b/1024).toFixed(1)+'KB' : (b/1048576).toFixed(1)+'MB'; }
-function showT(m) { const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); }
-window.onload = () => { if(loadConfig()) boot(); };
+// ── 上传 ──
+async function handleUpload(files) {
+  if (!files.length) return;
+  let done = 0;
+  for (const f of files) {
+    showT(`上传 ${done+1}/${files.length}: ${f.name}`);
+    await apiPut(currentPrefix + f.name, f, f.type || 'application/octet-stream');
+    done++;
+  }
+  showT(`✓ ${done} 个文件上传完成`);
+  await refreshFiles();
+}
+
+// ── 新建文件夹 ──
+async function createFolder() {
+  const n = prompt('文件夹名:');
+  if (!n || !n.trim()) return;
+  await apiPut(currentPrefix + n.trim() + '/.keep', '', 'text/plain');
+  showT('文件夹已创建');
+  await refreshFiles();
+}
+
+// ── Overlay ──
+function showOverlay(msg) {
+  document.getElementById('overlay-msg').textContent = msg;
+  document.getElementById('overlay').classList.add('show');
+}
+function hideOverlay() { document.getElementById('overlay').classList.remove('show'); }
+
+// ── Toast ──
+let toastT;
+function showT(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.style.display = 'block';
+  clearTimeout(toastT); toastT = setTimeout(() => t.style.display = 'none', 3000);
+}
+
+// ── Helpers ──
+function fmtSize(b) {
+  if (!b) return '—';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  if (b < 1073741824) return (b/1048576).toFixed(1) + ' MB';
+  return (b/1073741824).toFixed(2) + ' GB';
+}
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('zh-CN') : '—'; }
+
+window.onload = () => { if (loadConfig()) boot(); };
 </script>
 </body>
 </html>
