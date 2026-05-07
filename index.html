@@ -55,7 +55,130 @@
       .action-btn{flex:1;text-align:center;min-width:70px;padding:10px 0}
     }
 
-    /* OVERLAY for folder delete progress */
+    /* ══ 右上角上传进度面板 ══ */
+    #upload-panel {
+      position: fixed;
+      top: 68px;
+      right: 16px;
+      width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.12);
+      z-index: 200;
+      overflow: hidden;
+      /* 默认隐藏 */
+      display: none;
+      flex-direction: column;
+    }
+    #upload-panel.visible { display: flex; }
+
+    .up-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--ink);
+      color: #fff;
+      cursor: pointer;
+      user-select: none;
+    }
+    .up-header-left { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+    .up-badge {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 20px;
+      padding: 1px 8px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      min-width: 24px;
+      text-align: center;
+    }
+    .up-badge.done { background: var(--success); }
+    .up-toggle {
+      font-size: 11px;
+      color: rgba(255,255,255,.6);
+      transition: transform .25s;
+    }
+    .up-toggle.collapsed { transform: rotate(180deg); }
+
+    .up-body {
+      max-height: 280px;
+      overflow-y: auto;
+      transition: max-height .3s ease;
+    }
+    .up-body.collapsed { max-height: 0; }
+
+    .up-item {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .up-item:last-child { border-bottom: none; }
+
+    .up-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .up-item-name {
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+    .up-item-pct {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--ink2);
+      min-width: 36px;
+      text-align: right;
+    }
+    .up-bar-bg {
+      height: 3px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .up-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 3px;
+      background: var(--accent);
+      transition: width .2s;
+    }
+    .up-bar-fill.success { background: var(--success); }
+    .up-bar-fill.fail    { background: var(--danger); width: 100%; }
+
+    .up-status {
+      font-size: 11px;
+      color: var(--ink2);
+    }
+    .up-status.ok  { color: var(--success); }
+    .up-status.err { color: var(--danger); }
+
+    .up-footer {
+      padding: 8px 16px;
+      background: var(--surface2);
+      font-size: 11px;
+      color: var(--ink2);
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+    }
+    .up-footer-clear {
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* OVERLAY */
     #overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
     #overlay.show{display:flex}
     .overlay-box{background:#fff;border-radius:12px;padding:32px 40px;text-align:center;min-width:260px}
@@ -98,6 +221,22 @@
   </main>
 </div>
 
+<!-- ══ 右上角上传进度面板 ══ -->
+<div id="upload-panel">
+  <div class="up-header" onclick="togglePanel()">
+    <div class="up-header-left">
+      <span>☁ 上传队列</span>
+      <span class="up-badge" id="up-badge">0</span>
+    </div>
+    <span class="up-toggle" id="up-toggle">▲</span>
+  </div>
+  <div class="up-body" id="up-body"></div>
+  <div class="up-footer">
+    <span id="up-summary">等待上传...</span>
+    <span class="up-footer-clear" onclick="clearDoneItems()">清除已完成</span>
+  </div>
+</div>
+
 <div id="overlay">
   <div class="overlay-box">
     <div style="font-size:32px">⏳</div>
@@ -138,16 +277,8 @@ async function apiList(prefix) {
   return res.json();
 }
 
-async function apiPut(key, body, contentType) {
-  return fetch(`${CFG.worker}/${encodeURIComponent(key)}`, {
-    method: 'PUT', headers: authHeaders({ 'Content-Type': contentType || 'application/octet-stream' }), body
-  });
-}
-
 async function apiDelete(key) {
-  return fetch(`${CFG.worker}/${encodeURIComponent(key)}`, {
-    method: 'DELETE', headers: authHeaders()
-  });
+  return fetch(`${CFG.worker}/${encodeURIComponent(key)}`, { method: 'DELETE', headers: authHeaders() });
 }
 
 async function apiRename(oldPath, newPath) {
@@ -158,11 +289,9 @@ async function apiRename(oldPath, newPath) {
   });
 }
 
-// ── 列出某前缀下所有文件（递归，用于文件夹删除/改名）──
 async function listAllUnder(prefix) {
-  // 用不带 delimiter 的列表获取所有文件
   const res = await fetch(`${CFG.worker}/list-all?prefix=${encodeURIComponent(prefix)}`, { headers: authHeaders() });
-  return res.json(); // 返回 [{name, size, ...}]
+  return res.json();
 }
 
 // ── Refresh ──
@@ -194,7 +323,6 @@ function renderFiles(query = '') {
   const el = document.getElementById('file-list');
   const q = query.toLowerCase();
   const filtered = allFiles.filter(f => {
-    // 取显示名（去掉当前前缀部分）
     const disp = displayName(f);
     return disp && disp !== '.keep' && disp.toLowerCase().includes(q);
   });
@@ -208,7 +336,6 @@ function renderFiles(query = '') {
   html += filtered.map(f => {
     const isF = f.isFolder;
     const dName = displayName(f);
-    // 文件夹的 fullKey 去掉末尾 /，文件直接用 name
     const fullKey = isF ? f.name.replace(/\/$/, '') : f.name;
 
     return `<div class="file-row${isF ? ' is-folder' : ''}" onclick="${isF ? `goDir('${escAttr(f.name)}')` : ''}">
@@ -229,10 +356,7 @@ function renderFiles(query = '') {
   el.innerHTML = html;
 }
 
-// 取文件在当前目录的显示名
-function displayName(f) {
-  return f.name.slice(currentPrefix.length);
-}
+function displayName(f) { return f.name.slice(currentPrefix.length); }
 
 function getIcon(n) {
   const e = (n.split('.').pop() || '').toLowerCase();
@@ -262,18 +386,14 @@ function dlFile(url, name) {
 
 // ── 改名 ──
 async function doRename(fullKey, isFolder) {
-  // fullKey: 完整路径，不含末尾 /
-  // 取最后一段作为当前名
   const parts = fullKey.split('/');
   const oldName = parts[parts.length - 1];
   const newName = prompt('输入新名称:', oldName);
   if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
-
   const parentPath = parts.slice(0, -1).join('/');
   const newKey = parentPath ? parentPath + '/' + newName.trim() : newName.trim();
 
   if (isFolder === 'true' || isFolder === true) {
-    // 文件夹改名：列出所有子文件，逐个复制到新路径再删旧的
     showOverlay('正在重命名文件夹...');
     try {
       const children = await listAllUnder(fullKey + '/');
@@ -284,12 +404,9 @@ async function doRename(fullKey, isFolder) {
         done++;
         showOverlay(`重命名中... ${done}/${children.length}`);
       }
-      hideOverlay();
-      showT('文件夹已重命名');
-      await refreshFiles();
+      hideOverlay(); showT('文件夹已重命名'); await refreshFiles();
     } catch(e) { hideOverlay(); showT('失败: ' + e.message); }
   } else {
-    // 普通文件改名
     showT('正在重命名...');
     try {
       const res = await apiRename(fullKey, newKey);
@@ -302,7 +419,6 @@ async function doRename(fullKey, isFolder) {
 // ── 删除 ──
 async function doDelete(fullKey, isFolder) {
   const name = fullKey.split('/').pop();
-
   if (isFolder === 'true' || isFolder === true) {
     if (!confirm(`确认删除文件夹「${name}」及其所有内容？此操作不可撤销！`)) return;
     showOverlay('正在列出文件夹内容...');
@@ -314,9 +430,7 @@ async function doDelete(fullKey, isFolder) {
         done++;
         showOverlay(`删除中... ${done}/${children.length}`);
       }
-      hideOverlay();
-      showT(`已删除 ${done} 个文件`);
-      await refreshFiles();
+      hideOverlay(); showT(`已删除 ${done} 个文件`); await refreshFiles();
     } catch(e) { hideOverlay(); showT('失败: ' + e.message); }
   } else {
     if (!confirm(`确认删除「${name}」？`)) return;
@@ -324,26 +438,129 @@ async function doDelete(fullKey, isFolder) {
     try {
       const res = await apiDelete(fullKey);
       if (res.ok) {
-        // 立刻从本地移除，再拉新列表
         allFiles = allFiles.filter(f => f.name !== fullKey && f.name !== fullKey + '/');
-        renderFiles();
-        showT('已删除');
-        await refreshFiles();
+        renderFiles(); showT('已删除'); await refreshFiles();
       } else { showT('删除失败'); }
     } catch(e) { showT('网络错误'); }
   }
 }
 
-// ── 上传 ──
+// ══════════════════════════════════════════════
+// ── 上传进度面板 ──
+// ══════════════════════════════════════════════
+let uploadItems = [];   // { id, name, pct, status: 'pending'|'uploading'|'done'|'fail' }
+let panelCollapsed = false;
+
+function togglePanel() {
+  panelCollapsed = !panelCollapsed;
+  document.getElementById('up-body').classList.toggle('collapsed', panelCollapsed);
+  document.getElementById('up-toggle').classList.toggle('collapsed', panelCollapsed);
+}
+
+function clearDoneItems() {
+  uploadItems = uploadItems.filter(i => i.status !== 'done' && i.status !== 'fail');
+  renderPanel();
+  if (!uploadItems.length) document.getElementById('upload-panel').classList.remove('visible');
+}
+
+function renderPanel() {
+  const body = document.getElementById('up-body');
+  const badge = document.getElementById('up-badge');
+  const summary = document.getElementById('up-summary');
+
+  const active = uploadItems.filter(i => i.status === 'uploading' || i.status === 'pending');
+  const done   = uploadItems.filter(i => i.status === 'done').length;
+  const fail   = uploadItems.filter(i => i.status === 'fail').length;
+  const total  = uploadItems.length;
+
+  badge.textContent = total;
+  badge.className = 'up-badge' + (active.length === 0 && total > 0 ? ' done' : '');
+
+  if (active.length) {
+    summary.textContent = `上传中 ${done}/${total}`;
+  } else if (total) {
+    summary.textContent = `完成 ${done} · 失败 ${fail}`;
+  } else {
+    summary.textContent = '等待上传...';
+  }
+
+  body.innerHTML = uploadItems.map(item => {
+    const pctText = item.status === 'done' ? '✓' : item.status === 'fail' ? '✗' : item.pct + '%';
+    const barClass = item.status === 'done' ? 'success' : item.status === 'fail' ? 'fail' : '';
+    const stClass  = item.status === 'done' ? 'ok' : item.status === 'fail' ? 'err' : '';
+    const stText   = item.status === 'done' ? '上传成功' : item.status === 'fail' ? '上传失败' : item.status === 'uploading' ? '上传中...' : '等待中';
+
+    return `<div class="up-item" id="upitem-${item.id}">
+      <div class="up-item-top">
+        <div class="up-item-name" title="${item.name}">${item.name}</div>
+        <div class="up-item-pct">${pctText}</div>
+      </div>
+      <div class="up-bar-bg"><div class="up-bar-fill ${barClass}" style="width:${item.pct}%"></div></div>
+      <div class="up-status ${stClass}">${stText}${item.size ? ' · ' + fmtSize(item.size) : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateItem(id, patch) {
+  const item = uploadItems.find(i => i.id === id);
+  if (item) Object.assign(item, patch);
+  renderPanel();
+}
+
 async function handleUpload(files) {
   if (!files.length) return;
-  let done = 0;
-  for (const f of files) {
-    showT(`上传 ${done+1}/${files.length}: ${f.name}`);
-    await apiPut(currentPrefix + f.name, f, f.type || 'application/octet-stream');
-    done++;
+
+  // 显示面板，展开
+  const panel = document.getElementById('upload-panel');
+  panel.classList.add('visible');
+  if (panelCollapsed) togglePanel();
+
+  // 把所有文件加入队列
+  const newItems = Array.from(files).map((f, i) => ({
+    id: Date.now() + i,
+    name: f.name,
+    size: f.size,
+    pct: 0,
+    status: 'pending',
+    file: f
+  }));
+  uploadItems = [...uploadItems, ...newItems];
+  renderPanel();
+
+  // 逐个上传，用 XHR 获取真实进度
+  for (const item of newItems) {
+    updateItem(item.id, { status: 'uploading', pct: 0 });
+
+    try {
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const key = currentPrefix + item.file.name;
+        xhr.open('PUT', `${CFG.worker}/${encodeURIComponent(key)}`);
+        xhr.setRequestHeader('X-Auth-Key', CFG.key);
+        xhr.setRequestHeader('Content-Type', item.file.type || 'application/octet-stream');
+
+        xhr.upload.onprogress = e => {
+          if (e.lengthComputable) {
+            const pct = Math.round(e.loaded / e.total * 100);
+            updateItem(item.id, { pct });
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error('HTTP ' + xhr.status));
+        };
+        xhr.onerror = () => reject(new Error('网络错误'));
+        xhr.send(item.file);
+      });
+
+      updateItem(item.id, { status: 'done', pct: 100 });
+    } catch(e) {
+      updateItem(item.id, { status: 'fail' });
+    }
   }
-  showT(`✓ ${done} 个文件上传完成`);
+
+  // 全部完成后刷新列表
   await refreshFiles();
 }
 
@@ -351,16 +568,16 @@ async function handleUpload(files) {
 async function createFolder() {
   const n = prompt('文件夹名:');
   if (!n || !n.trim()) return;
-  await apiPut(currentPrefix + n.trim() + '/.keep', '', 'text/plain');
-  showT('文件夹已创建');
-  await refreshFiles();
+  const xhr = new XMLHttpRequest();
+  xhr.open('PUT', `${CFG.worker}/${encodeURIComponent(currentPrefix + n.trim() + '/.keep')}`);
+  xhr.setRequestHeader('X-Auth-Key', CFG.key);
+  xhr.setRequestHeader('Content-Type', 'text/plain');
+  xhr.onload = () => { showT('文件夹已创建'); refreshFiles(); };
+  xhr.send('');
 }
 
 // ── Overlay ──
-function showOverlay(msg) {
-  document.getElementById('overlay-msg').textContent = msg;
-  document.getElementById('overlay').classList.add('show');
-}
+function showOverlay(msg) { document.getElementById('overlay-msg').textContent = msg; document.getElementById('overlay').classList.add('show'); }
 function hideOverlay() { document.getElementById('overlay').classList.remove('show'); }
 
 // ── Toast ──
