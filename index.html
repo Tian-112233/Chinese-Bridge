@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>R2 全能文件管理站</title>
-  <link href="https://gs.jurieo.com/gemini/fonts-googleapis/css2?family=Sora:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>R2 Cloud Manager - Final</title>
+  <link href="https://gs.jurieo.com/gemini/fonts-googleapis/css2?family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f5f2ec; --surface: #ffffff; --surface2: #f0ede6; --border: #e0dbd0;
@@ -17,38 +17,38 @@
     #login-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 100; padding: 20px; }
     .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px 30px; width: 100%; max-width: 400px; box-shadow: var(--shadow); }
     .field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; font-family: 'JetBrains Mono', monospace; margin: 8px 0 20px; outline: none; font-size: 14px; }
-    .btn-primary { width: 100%; background: var(--ink); color: var(--bg); border: none; border-radius: var(--radius); padding: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary { width: 100%; background: var(--ink); color: var(--bg); border: none; border-radius: var(--radius); padding: 14px; font-weight: 700; cursor: pointer; }
 
     #app { display: none; }
     header { background: var(--ink); color: var(--bg); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
     .breadcrumb-bar { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; gap: 8px; font-size: 13px; overflow-x: auto; white-space: nowrap; }
     .breadcrumb-item { color: var(--accent); font-weight: 600; cursor: pointer; }
-    
+    .breadcrumb-sep { color: #aaa; font-weight: normal; }
+
     main { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    .upload-area { border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 24px; text-align: center; padding: 50px 20px; cursor: pointer; transition: 0.3s; }
+    .upload-area { border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface); margin-bottom: 24px; text-align: center; padding: 40px 20px; cursor: pointer; transition: 0.3s; }
     .upload-area:hover, .upload-area.dragover { border-color: var(--accent); background: var(--surface2); }
     
     .toolbar { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; flex-wrap: wrap; gap: 15px; }
-    .btn-action { background: var(--surface); border: 1px solid var(--border); padding: 10px 16px; border-radius: var(--radius); cursor: pointer; font-size: 13px; font-weight: 600; box-shadow: var(--shadow); }
+    .btn-action { background: var(--surface); border: 1px solid var(--border); padding: 10px 16px; border-radius: var(--radius); cursor: pointer; font-size: 13px; font-weight: 600; }
 
     .file-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
     .table-head, .file-row { display: grid; grid-template-columns: 50px 1fr 100px 180px 240px; padding: 14px 20px; align-items: center; border-bottom: 1px solid var(--border); }
     .table-head { background: var(--surface2); font-size: 11px; font-weight: 700; color: var(--ink2); text-transform: uppercase; }
-    .file-row:last-child { border-bottom: none; }
     .file-row:hover { background: var(--surface2); }
 
-    .action-group { display: flex; gap: 8px; justify-content: flex-end; }
-    .action-btn { background: none; border: 1px solid var(--border); padding: 6px 12px; font-size: 12px; cursor: pointer; border-radius: 4px; transition: 0.2s; font-weight: 600; }
+    .action-group { display: flex; gap: 6px; justify-content: flex-end; }
+    .action-btn { background: none; border: 1px solid var(--border); padding: 6px 12px; font-size: 12px; cursor: pointer; border-radius: 4px; transition: 0.2s; }
     .action-btn:hover { background: var(--ink); color: #fff; }
 
+    /* 手机端适配 */
     @media (max-width: 850px) {
       .table-head { display: none; }
       .file-row { grid-template-columns: 40px 1fr; padding: 16px; gap: 6px 12px; }
       .file-name-cell { grid-column: 2; font-weight: 700; font-size: 15px; word-break: break-all; }
-      .file-meta { grid-column: 2; display: flex; gap: 15px; font-size: 11px; color: var(--ink2); }
-      .action-group { grid-column: 1 / span 2; justify-content: flex-start; margin-top: 12px; flex-wrap: wrap; }
-      .action-btn { flex: 1; min-width: 75px; padding: 10px 0; }
+      .meta-info { grid-column: 2; font-size: 11px; color: var(--ink2); display: flex; gap: 10px; }
+      .action-group { grid-column: 1 / span 2; justify-content: flex-start; margin-top: 10px; flex-wrap: wrap; gap: 8px; }
+      .action-btn { flex: 1; text-align: center; min-width: 70px; padding: 10px 0; }
     }
 
     #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 14px 24px; border-radius: 40px; display: none; z-index: 2000; font-size: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
@@ -59,26 +59,23 @@
 <div id="login-screen">
   <div class="login-box">
     <h2 style="margin-bottom:20px; text-align:center;">R2 Cloud Manager</h2>
-    <label style="font-size:11px; font-weight:700;">WORKER ENDPOINT</label>
-    <input class="field-input" id="inp-worker" placeholder="https://xxx.workers.dev">
-    <label style="font-size:11px; font-weight:700;">ACCESS KEY</label>
-    <input class="field-input" id="inp-key" type="password">
-    <button class="btn-primary" onclick="saveConfig()">立即进入</button>
+    <input class="field-input" id="inp-worker" placeholder="Worker URL (https://...)">
+    <input class="field-input" id="inp-key" type="password" placeholder="Access Key">
+    <button class="btn-primary" onclick="saveConfig()">登录系统</button>
   </div>
 </div>
 
 <div id="app">
-  <header><div class="logo"><em>▣</em> R2 STORAGE</div><button onclick="clearConfig()" style="background:none; border:none; color:white; font-size:13px; cursor:pointer;">退出登录</button></header>
+  <header><div class="logo"><em>▣</em> R2 STORAGE</div><button onclick="clearConfig()" style="background:none; border:none; color:white; font-size:12px; cursor:pointer;">退出</button></header>
   <div class="breadcrumb-bar" id="breadcrumb"></div>
   <main>
     <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
-      <div style="font-weight:700; font-size:16px; color:var(--ink)">☁ 点击此处或拖入文件上传</div>
-      <div style="font-size:12px; color:var(--ink2); margin-top:8px;">支持视频、音频、PPT、图片等所有格式</div>
+      <div style="font-weight:700; font-size:16px;">☁ 点击或拖拽上传到当前目录</div>
       <input type="file" id="file-input" multiple style="display:none" onchange="handleUpload(this.files)">
     </div>
     <div class="toolbar">
       <div><button class="btn-action" onclick="createFolder()">+ 文件夹</button><button class="btn-action" onclick="refreshFiles()">↺ 刷新</button></div>
-      <input class="field-input" style="width:200px; height:40px; margin:0;" placeholder="搜索文件名..." oninput="renderFiles(this.value)">
+      <input class="field-input" style="width:200px; height:40px; margin:0;" placeholder="搜索..." oninput="renderFiles(this.value)">
     </div>
     <div class="file-table" id="file-list"></div>
   </main>
@@ -88,6 +85,7 @@
 <script>
 let CFG = {}, allFiles = [], currentPrefix = '';
 
+// 拖拽逻辑
 const dz = document.getElementById('drop-zone');
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dz.addEventListener(e, x => { x.preventDefault(); x.stopPropagation(); }));
 dz.addEventListener('dragover', () => dz.classList.add('dragover'));
@@ -99,22 +97,22 @@ function saveConfig() {
   const k = document.getElementById('inp-key').value.trim();
   if (!w || !k) return;
   CFG = { worker: w, key: k };
-  localStorage.setItem('r2_v6', JSON.stringify(CFG));
+  localStorage.setItem('r2_v7', JSON.stringify(CFG));
   boot();
 }
-function loadConfig() { const s = localStorage.getItem('r2_v6'); if(s){ CFG=JSON.parse(s); return true; } return false; }
-function clearConfig() { localStorage.removeItem('r2_v6'); location.reload(); }
+function loadConfig() { const s = localStorage.getItem('r2_v7'); if(s){ CFG=JSON.parse(s); return true; } return false; }
+function clearConfig() { localStorage.removeItem('r2_v7'); location.reload(); }
 function boot() { document.getElementById('login-screen').style.display='none'; document.getElementById('app').style.display='block'; refreshFiles(); }
 
 async function refreshFiles() {
   const el = document.getElementById('file-list');
-  el.innerHTML = '<div style="padding:40px;text-align:center;color:#999;">正在拉取云端文件...</div>';
+  el.innerHTML = '<div style="padding:40px;text-align:center;color:#999;">同步中...</div>';
   updateBread();
   try {
     const res = await fetch(`${CFG.worker}/list?prefix=${encodeURIComponent(currentPrefix)}`, { headers: {'X-Auth-Key': CFG.key} });
     allFiles = await res.json();
     renderFiles();
-  } catch(e) { el.innerHTML = '<div style="padding:40px;text-align:center;color:red;">Worker 连接失败</div>'; }
+  } catch(e) { el.innerHTML = '<div style="padding:40px;text-align:center;color:red;">连接失败</div>'; }
 }
 
 function updateBread() {
@@ -122,7 +120,7 @@ function updateBread() {
   const parts = currentPrefix.split('/').filter(Boolean);
   let h = `<span class="breadcrumb-item" onclick="goDir('')">根目录</span>`;
   let p = '';
-  parts.forEach(x => { p += x + '/'; h += ` <span style="color:#ccc">/</span> <span class="breadcrumb-item" onclick="goDir('${p}')">${x}</span>`; });
+  parts.forEach(x => { p += x + '/'; h += ` <span class="breadcrumb-sep">/</span> <span class="breadcrumb-item" onclick="goDir('${p}')">${x}</span>`; });
   b.innerHTML = h;
 }
 function goDir(p) { currentPrefix = p; refreshFiles(); }
@@ -132,7 +130,7 @@ function renderFiles(query='') {
   const q = query.toLowerCase();
   const filtered = allFiles.filter(f => f.name.toLowerCase().includes(q));
   
-  if(!filtered.length) { el.innerHTML = '<div style="padding:50px;text-align:center;color:#999">当前目录空空如也</div>'; return; }
+  if(!filtered.length) { el.innerHTML = '<div style="padding:50px;text-align:center;color:#999">空</div>'; return; }
 
   let html = `<div class="table-head"><div></div><div>名称</div><div>大小</div><div>修改日期</div><div style="text-align:right">操作</div></div>`;
   html += filtered.map(f => {
@@ -143,9 +141,9 @@ function renderFiles(query='') {
     return `<div class="file-row ${isF?'folder-row':''}" onclick="${isF?`goDir('${f.name}')`:''}">
       <div style="font-size:20px">${isF?'📁':getFileIcon(dName)}</div>
       <div class="file-name-cell">${dName}</div>
-      <div class="file-meta">
-        <span class="file-size-cell">大小: ${isF?'—':fmtSize(f.size)}</span>
-        <span class="file-date-cell">日期: ${isF?'—':new Date(f.uploaded).toLocaleDateString()}</span>
+      <div class="meta-info">
+        <span>大小: ${isF?'—':fmtSize(f.size)}</span>
+        <span>日期: ${isF?'—':new Date(f.uploaded).toLocaleDateString()}</span>
       </div>
       <div class="action-group" onclick="event.stopPropagation()">
         ${!isF ? `<button class="action-btn" onclick="previewFile('${f.url}','${dName}')">预览</button>` : ''}
@@ -158,19 +156,19 @@ function renderFiles(query='') {
   el.innerHTML = html;
 }
 
-function getFileIcon(name) {
-  const ext = name.split('.').pop().toLowerCase();
-  if (['mp4', 'mov', 'webm', 'avi', 'mkv'].includes(ext)) return '🎬';
-  if (['mp3', 'wav', 'm4a', 'flac'].includes(ext)) return '🎵';
-  if (['ppt', 'pptx'].includes(ext)) return '📊';
-  if (['jpg', 'png', 'gif', 'webp'].includes(ext)) return '🖼️';
-  if (['pdf'].includes(ext)) return '📄';
+function getFileIcon(n) {
+  const e = n.split('.').pop().toLowerCase();
+  if(['mp4','mov','webm'].includes(e)) return '🎬';
+  if(['mp3','wav','m4a'].includes(e)) return '🎵';
+  if(['ppt','pptx'].includes(e)) return '📊';
+  if(['jpg','png','webp','gif'].includes(e)) return '🖼️';
+  if(['pdf'].includes(e)) return '📄';
   return '📝';
 }
 
 function previewFile(url, name) {
-  const ext = name.split('.').pop().toLowerCase();
-  if (['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx'].includes(ext)) {
+  const e = name.split('.').pop().toLowerCase();
+  if (['ppt','pptx','doc','docx','xls','xlsx'].includes(e)) {
     window.open(`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}&wdAr=0`, '_blank');
   } else {
     window.open(url, '_blank');
@@ -182,40 +180,57 @@ function downloadFile(url, name) {
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
+// ── 修复后的重命名逻辑 ──
 async function renameFile(oldP) {
   const oldN = oldP.split('/').pop();
-  const newN = prompt('重命名为:', oldN);
+  const newN = prompt('输入新名称:', oldN);
   if(!newN || newN === oldN) return;
-  showT('正在云端重命名...');
+  
+  // 核心：使用 currentPrefix 确保路径不重叠
+  const newP = currentPrefix + newN;
+  showT('正在重命名...');
+  
   try {
     const res = await fetch(`${CFG.worker}/rename`, {
       method:'POST', headers:{'X-Auth-Key':CFG.key,'Content-Type':'application/json'},
-      body: JSON.stringify({ oldPath: oldP, newPath: currentPrefix + newN })
+      body: JSON.stringify({ oldPath: oldP, newPath: newP })
     });
-    if(res.ok) { showT('重命名成功','success'); refreshFiles(); }
-  } catch(e) { showT('操作失败','error'); }
+    if(res.ok) { 
+      showT('成功','success'); 
+      allFiles = []; // 强制清空
+      await refreshFiles(); 
+    } else {
+      showT('失败: ' + await res.text(), 'error');
+    }
+  } catch(e) { showT('网络错误','error'); }
 }
 
 async function handleUpload(files) {
   for(let f of files) {
-    showT(`上传中: ${f.name}`);
+    showT(`上传: ${f.name}`);
     await fetch(`${CFG.worker}/${encodeURIComponent(currentPrefix + f.name)}`, {
       method:'PUT', headers:{'X-Auth-Key':CFG.key,'Content-Type':f.type}, body:f
     });
   }
-  showT('上传任务已全部完成'); refreshFiles();
+  showT('完成'); refreshFiles();
 }
 
 async function createFolder() {
-  const n = prompt('新文件夹名:'); if(!n) return;
+  const n = prompt('文件夹名:'); if(!n) return;
   await fetch(`${CFG.worker}/${encodeURIComponent(currentPrefix+n+'/.keep')}`, { method:'PUT', headers:{'X-Auth-Key':CFG.key}, body:'' });
   refreshFiles();
 }
 
-async function delFile(p) { if(confirm('确认删除？')){ await fetch(`${CFG.worker}/${encodeURIComponent(p)}`, { method:'DELETE', headers:{'X-Auth-Key':CFG.key} }); refreshFiles(); } }
+async function delFile(p) { 
+  if(confirm('删除此项？')){ 
+    const res = await fetch(`${CFG.worker}/${encodeURIComponent(p)}`, { method:'DELETE', headers:{'X-Auth-Key':CFG.key} }); 
+    if(res.ok) { showT('已删除','success'); refreshFiles(); }
+    else showT('删除失败','error');
+  } 
+}
 
-function fmtSize(b) { if(!b) return '0B'; return b < 1048576 ? (b/1024).toFixed(1)+'KB' : (b/1048576).toFixed(1)+'MB'; }
-function showT(m) { const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',3000); }
+function fmtSize(b) { return b < 1048576 ? (b/1024).toFixed(1)+'KB' : (b/1048576).toFixed(1)+'MB'; }
+function showT(m) { const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); }
 window.onload = () => { if(loadConfig()) boot(); };
 </script>
 </body>
