@@ -327,6 +327,14 @@ function renderFiles(query = '') {
     return disp && disp !== '.keep' && disp.toLowerCase().includes(q);
   });
 
+  // 排序：文件夹在前，同类按拼音/字母顺序
+  filtered.sort((a, b) => {
+    if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1;
+    const na = displayName(a).replace(/\/$/, '');
+    const nb = displayName(b).replace(/\/$/, '');
+    return na.localeCompare(nb, 'zh-CN', { sensitivity: 'base' });
+  });
+
   if (!filtered.length) {
     el.innerHTML = '<div style="padding:50px;text-align:center;color:#999">当前目录为空</div>';
     return;
